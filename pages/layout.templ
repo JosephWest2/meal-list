@@ -1,0 +1,23 @@
+package pages
+
+templ Layout(pageTitle string, message string, pageComponent templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Meal List - { pageTitle }</title>
+        <link rel="stylesheet" href="static/css/style.css">
+    </head>
+    <body>
+        <nav>
+            <a class="navitem" href="recipes">Recipes</a>
+        </nav>
+        <main>
+            <h1>{ pageTitle }</h1>
+            <h3>{ message }</h3>
+            @pageComponent
+        </main>
+    </body>
+    </html>
+}

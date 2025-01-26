@@ -1,0 +1,13 @@
+:root {
+    --text-color: black;
+    --bg1: whitesmoke;
+    --button-color: lightgray;
+    --button-hover-color: whitesmoke;
+    --navborder-color: gray;
+    --nav-bg: lightblue;
+    --border-width: 1px;
+}
+* {
+    padding: 0;
+    margin: 0;
+}

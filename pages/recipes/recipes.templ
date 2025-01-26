@@ -1,0 +1,29 @@
+package recipes
+
+import "josephwest2/meal-list/lib/db"
+
+templ Recipes(recipes []db.Recipe) {
+    <h2>Hello Recipes</h2>
+    for _, recipe := range recipes {
+        <li>
+            <h4>{ recipe.Name }</h4>
+            <ul>
+            for _, ingredientQuantity := range recipe.IngredientQuantities {
+                <li>{ ingredientQuantity.Ingredient.Name }</li>
+            }
+            </ul>
+            <p>{ recipe.Directions }</p>
+        </li>
+    }
+    <script>
+        async function SeedDB() {
+            const res = await fetch("/api/seed", {
+                method: "POST"
+            });
+            if (res.status == 201) {
+                alert("Successfully seeded db")
+            }
+        }
+    </script>
+    <button onclick="SeedDB()">Seed DB</button>
+}
