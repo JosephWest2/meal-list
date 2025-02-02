@@ -1,0 +1,41 @@
+package list
+
+import "josephwest2/meal-list/lib/db"
+import "strconv"
+
+templ List(list *db.List) {
+    <form class="row" name="add-list-item" action="/list" method="POST">
+        <div class="col">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="col">
+            <label for="quantity">Amount:</label>
+            <input type="number" id="quantity" name="quantity" required>
+        </div>
+        <div class="col">
+            <label for="unit">Unit (Optional):</label>
+            <input type="text" id="unit" name="unit" required>
+        </div>
+        <button class="btn" type="submit">Add</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+        for _, listItem := range list.ListItems {
+            <tr>
+                <td>{ listItem.Name }</td>
+                <td>{ strconv.FormatFloat(listItem.Quantity, 'f', 2, 64) }</td>
+                <td>{ listItem.Unit }</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+}

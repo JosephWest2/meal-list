@@ -1,13 +1,143 @@
 :root {
     --text-color: black;
     --bg1: whitesmoke;
-    --button-color: lightgray;
-    --button-hover-color: whitesmoke;
+    --button-color: rgb(139, 185, 209);
+    --button-hover-color: lightblue;
     --navborder-color: gray;
+    --button-radius: 5px;
     --nav-bg: lightblue;
     --border-width: 1px;
+    --medium-padding: 1rem;
+    --small-padding: 0.5rem;
+
+    --standard-border: var(--border-width) solid grey;
+    --standard-radius: var(--button-radius);
+    --table-border: var(--border-width) solid lightgray;
 }
 * {
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+ul, ol {
+    padding-left: 1em;
+}
+body {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    background-color: var(--bg1);
+    font-family: Helvetica, sans-serif, Arial;
+}
+nav {
+    display: flex;
+    gap: var(--small-padding);
+    padding: var(--medium-padding);
+    flex-direction: column;
+    background-color: var(--nav-bg);
+    border-right: var(--border-width) solid var(--navborder-color);
+    height: 100%;
+}
+.navitem {
+    background-color: var(--button-color);
+    border-radius: var(--button-radius);
+    text-align: center;
+    border: none;
+    padding: var(--medium-padding);
+    cursor: pointer;
+}
+.navitem:last-child {
+    margin-top: auto;
+}
+main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--medium-padding);
+    padding: var(--medium-padding);
+}
+form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--small-padding);
+}
+input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
+    padding: var(--small-padding);
+    border: var(--standard-border);
+    border-radius: var(--standard-radius);
+}
+.inline-link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    width: fit-content;
+}
+.inline-link:visited {
+    color: purple;
+}
+.btn {
+    padding: var(--small-padding);
+    border: var(--standard-border);
+    border-radius: var(--standard-radius);
+    cursor: pointer;
+}
+.btn:hover {
+    background-color: var(--button-hover-color);
+}
+.message {
+    color: blue;
+}
+.warning {
+    color: yellow;
+}
+.error {
+    color: red;
+}
+.success {
+    color: green;
+}
+.image-thumbnail {
+    align-self: center;
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+}
+.recipe-link {
+    background-color: var(--button-color);
+    border-radius: var(--button-radius);
+    display: flex;
+    flex-direction: column;
+    gap: var(--small-padding);
+    padding: var(--small-padding);
+    cursor: pointer;
+}
+.directions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.recipe-image {
+    width: 240px;
+    height: 240px;
+    object-fit: cover;
+}
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--small-padding);
+}
+.col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--small-padding);
+}
+table {
+    border-collapse: collapse;
+}
+td, th {
+    padding: var(--small-padding);
+    border: var(--standard-border);
 }

@@ -1,0 +1,34 @@
+package recipe
+
+import (
+    "josephwest2/meal-list/lib/db"
+    "strconv"
+)
+
+templ Recipe(recipe db.Recipe, directionsParsed []string) {
+    <h2>{ recipe.Name }</h2>
+    <h3>Category { recipe.RecipeCategory.Name }</h3>
+    <a target="_blank" class="inline-link" href={ templ.SafeURL(recipe.RecipeSourceURL) }>Source</a>
+    <img class="recipe-image" src={ "/static/recipe-images/" + recipe.ImageRef } alt={ "Image of " + recipe.Name }>
+    <h3>Ingredients</h3>
+    <table class="ingredient-table">
+        <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Unit</th>
+        </tr>
+        for _, ingredient := range recipe.IngredientQuantities {
+            <tr>
+                <td>{ ingredient.Ingredient.Name }</td>
+                <td>{ strconv.FormatFloat(ingredient.Quantity, 'f', 2, 64) }</td>
+                <td>{ ingredient.Unit.Name }</td>
+            </tr>
+        }
+    </table>
+    <h3>Directions</h3>
+    <div class="directions-container">
+    for _, direction := range directionsParsed {
+        <p>{ direction }</p>
+    }
+    </div>
+}

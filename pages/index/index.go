@@ -6,5 +6,5 @@ import (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	pages.RenderPage("Home", Index(r.URL.Path[1:]), w, r)
+	pages.RenderPage("Home", Index(r.URL.Path[1:]), nil, w, r)
 }

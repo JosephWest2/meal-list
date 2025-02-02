@@ -1,0 +1,48 @@
+package register
+
+templ Register() {
+    <form action="/register" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" minlength="3" maxlength="32" required>
+        <p>Password requires:</p>
+        <ul>
+            <li>At least 8 characters</li>
+            <li>At least one letter</li>
+            <li>At least one number</li>
+            <li>At least one special character</li>
+        </ul>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" minlength="8" maxlength="32" required>
+        <label for="confirm-password">Confirm Password:</label>
+        <input type="password" id="confirm-password" name="confirm-password" minlength="8" maxlength="32" required>
+        <button class="btn" type="submit">Register</button>
+    </form>
+    <script>
+        function validatePassword(passwdInput, confirmPasswdInput) {
+            let validity = "";
+            if (!passwdInput.value.match(/[a-zA-Z]/)) {
+                validity += "Password must contain at least one letter\n";
+                console.log("no letter")
+            }
+            if (!passwdInput.value.match(/\d/)) {
+                validity += "Password must contain at least one number\n";
+                console.log("no number")
+            }
+            if (!passwdInput.value.match(/[ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~\\]/)) {
+                console.log("no special char")
+                validity += "Password must contain at least one special character\n";
+            }
+            passwdInput.setCustomValidity(validity);
+
+            if (passwdInput.value != confirmPasswdInput.value) {
+                confirmPasswdInput.setCustomValidity("Passwords do not match");
+            } else {
+                confirmPasswdInput.setCustomValidity("");
+            }
+        }
+        const passwdInput = document.getElementById("password");
+        const confirmPasswdInput = document.getElementById("confirm-password");
+        passwdInput.addEventListener("input", () => validatePassword(passwdInput, confirmPasswdInput));
+        confirmPasswdInput.addEventListener("input", () => validatePassword(passwdInput, confirmPasswdInput));
+    </script>
+}

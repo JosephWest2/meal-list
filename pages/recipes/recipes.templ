@@ -1,19 +1,18 @@
 package recipes
 
-import "josephwest2/meal-list/lib/db"
+import (
+    "josephwest2/meal-list/lib/db"
+    "strconv"
+)
+
 
 templ Recipes(recipes []db.Recipe) {
-    <h2>Hello Recipes</h2>
     for _, recipe := range recipes {
-        <li>
-            <h4>{ recipe.Name }</h4>
-            <ul>
-            for _, ingredientQuantity := range recipe.IngredientQuantities {
-                <li>{ ingredientQuantity.Ingredient.Name }</li>
-            }
-            </ul>
-            <p>{ recipe.Directions }</p>
-        </li>
+        <a class="recipe-link" href={ templ.SafeURL("/recipes/" + strconv.FormatUint(uint64(recipe.ID), 10)) }>
+            <h3>{ recipe.Name }</h3>
+            <h4>{ recipe.RecipeCategory.Name }</h4>
+            <img class="image-thumbnail" src={ "/static/recipe-images/" + recipe.ImageRef } alt={ recipe.Name }>
+        </a>
     }
     <script>
         async function SeedDB() {
