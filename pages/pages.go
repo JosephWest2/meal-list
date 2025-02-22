@@ -19,8 +19,9 @@ const (
 )
 
 type PageMessage struct {
-	Value string
-	Type  MessageType
+	Value   string
+	Type    MessageType
+	Timeout bool
 }
 
 func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, message PageMessage) {
@@ -41,38 +42,22 @@ func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, me
 func RenderPage(pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
 
 	messageQuery := r.URL.Query()["message"]
-	messageParam := ""
 	if messageQuery != nil {
-		messageParam = messageQuery[0]
+		messages = append(messages, PageMessage{Type: Message, Value: messageQuery[0]})
 	}
 	warningQuery := r.URL.Query()["warning"]
-	warningParam := ""
 	if warningQuery != nil {
-		warningParam = warningQuery[0]
+		messages = append(messages, PageMessage{Type: Warning, Value: messageQuery[0]})
 	}
 	successQuery := r.URL.Query()["success"]
-	successParam := ""
 	if successQuery != nil {
-		successParam = successQuery[0]
+		messages = append(messages, PageMessage{Type: Success, Value: messageQuery[0]})
 	}
 	errorQuery := r.URL.Query()["error"]
-	errorParam := ""
 	if errorQuery != nil {
-		errorParam = errorQuery[0]
-	}
-	for _, message := range messages {
-		switch message.Type {
-		case Message:
-			messageParam = message.Value
-		case Success:
-			successParam = message.Value
-		case Warning:
-			warningParam = message.Value
-		case Error:
-			errorParam = message.Value
-		}
+		messages = append(messages, PageMessage{Type: Error, Value: messageQuery[0]})
 	}
 	isLoggedIn := auth.IsLoggedInUnverified(r)
-	page := Layout(pageTitle, messageParam, warningParam, successParam, errorParam, isLoggedIn, pageComponent)
+	page := Layout(pageTitle, messages, isLoggedIn, pageComponent)
 	page.Render(context.Background(), w)
 }

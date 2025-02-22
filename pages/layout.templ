@@ -1,6 +1,10 @@
 package pages
 
-templ Layout(pageTitle string, message string, warning string, success string, err string, isAuthenticated bool, pageComponent templ.Component) {
+import (
+    "strconv"
+)
+
+templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, pageComponent templ.Component) {
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -22,17 +26,28 @@ templ Layout(pageTitle string, message string, warning string, success string, e
         </nav>
         <main>
             <h1>{ pageTitle }</h1>
-            if message != "" {
-                <h3 class="message">{ message }</h3>
-            }
-            if warning != "" {
-                <h3 class="warning">{ warning }</h3>
-            }
-            if success != "" {
-                <h3 class="success">{ success }</h3>
-            }
-            if err != "" {
-                <h3 class="error">{ err }</h3>
+            for i, message := range messages {
+                {{ id := "message-" + strconv.Itoa(i) }}
+                switch message.Type {
+                case Message:
+                    <h3 id={ id } class="message">{ message.Value }</h3>
+                case Success:
+                    <h3 id={ id } class="success">{ message.Value }</h3>
+                case Warning:
+                    <h3 id={ id } class="warning">{ message.Value }</h3>
+                case Error:
+                    <h3 id={ id } class="error">{ message.Value }</h3>
+                }
+                if message.Timeout {
+                    <script>
+                        function TimeoutMessage(id) {
+                            setTimeout(() => {
+                                document.getElementById(id).remove();
+                            }, 10000);
+                        }
+                    </script>
+                    @templ.JSFuncCall("TimeoutMessage", id)
+                }
             }
             @pageComponent
         </main>

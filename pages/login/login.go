@@ -16,10 +16,10 @@ func Handler(context *app.AppContext) http.HandlerFunc {
 			username := r.FormValue("username")
 			password := r.FormValue("password")
 			if auth.Authenticate(context.DB, w, r, username, password) {
-				pages.RedirectWithMessage(w, r, "/", pages.PageMessage{Type: pages.Success, Value: "Login Success"})
+				pages.RedirectWithMessage(w, r, "/", pages.PageMessage{Type: pages.Success, Value: "Login Success", Timeout: false})
 				return
 			} else {
-				pages.RedirectWithMessage(w, r, "/login", pages.PageMessage{Type: pages.Error, Value: "Invalid Credentials"})
+				pages.RedirectWithMessage(w, r, "/login", pages.PageMessage{Type: pages.Error, Value: "Invalid Credentials", Timeout: false})
 				return
 			}
 		default:

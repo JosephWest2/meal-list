@@ -18,6 +18,7 @@ func Handler(context *app.AppContext) http.HandlerFunc {
 			return
 		}
 		list := context.DB.GetListByUserID(userID)
+		messages := make([]pages.PageMessage, 0)
 		switch r.Method {
 		case "GET":
 		case "POST":
@@ -42,12 +43,14 @@ func Handler(context *app.AppContext) http.HandlerFunc {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			messages = append(messages, pages.PageMessage{Type: pages.Success, Value: "Item added to list", Timeout: true})
+			list = context.DB.GetListByUserID(userID)
 		case "PATCH":
 		case "DELETE":
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		pages.RenderPage("List", List(&list), nil, w, r)
+		pages.RenderPage("List", List(&list), messages, w, r)
 	}
 }
