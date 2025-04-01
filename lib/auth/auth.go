@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"errors"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/db"
@@ -13,6 +14,11 @@ import (
 
 const authCookieName = "meal-list-auth"
 const sessionTimeout = 30 * time.Minute
+
+const (
+	StandardUserRole db.Role = 0
+	AdminRole db.Role = 1
+)
 
 func IsAuthenticated(db *db.DB, r *http.Request) bool {
 	authCookie, err := r.Cookie(authCookieName)
@@ -41,7 +47,11 @@ func IsAuthorized(db *db.DB, r *http.Request, requiredRole db.Role) bool {
 	if err != nil {
 		return false
 	}
-	if session.User.Role < requiredRole {
+    user, err := db.GetUserByID(session.UserID)
+    if err != nil {
+        return false
+    }
+	if user.Role < requiredRole {
 		return false
 	}
 	return true
@@ -54,16 +64,20 @@ func Logout(db *db.DB, w http.ResponseWriter, r *http.Request) {
 
 // returns true if authentication is successful else false
 func Authenticate(db *db.DB, w http.ResponseWriter, r *http.Request, username string, password string) bool {
-	user, err := db.GetUserByUsername(username)
-	if err != nil {
-		// time equalizer for incorrrect username
-		bcrypt.CompareHashAndPassword([]byte("jshdf08734t5y467543qwoqu"), []byte(password))
-		return false
-	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
-	if err != nil {
-		return false
-	}
+	user, usernameErr := db.GetUserByUsername(username)
+    var passwordCompare string
+    // the code is structured this way to make comparison times the same for incorrect username
+	if usernameErr != nil {
+        token := make([]byte, 20)
+        rand.Read(token)
+        passwordCompare = string(token)
+	} else {
+        passwordCompare = user.PasswordHash
+    }
+    passErr := bcrypt.CompareHashAndPassword([]byte(passwordCompare), []byte(password))
+    if passErr != nil || usernameErr != nil {
+        return false;
+    }
 	sessionId := ulid.Make().String()
 	SetSessionCookie(w, sessionId)
 	db.CreateSession(sessionId, user.ID)
@@ -118,7 +132,7 @@ func WithAuth(requiredRole db.Role, context *app.AppContext, handler http.Handle
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !IsAuthenticated(context.DB, r) {
-			http.Redirect(w, r, "/login?message=Login+Required", http.StatusSeeOther)
+			http.Redirect(w, r, "/login?message=Login+Required&target=" + r.URL.Path, http.StatusSeeOther)
 			return
 		}
 		if !IsAuthorized(context.DB, r, requiredRole) {

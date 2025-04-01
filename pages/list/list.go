@@ -10,47 +10,47 @@ import (
 	"strconv"
 )
 
-func Handler(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, err := auth.GetUserIDFromSession(context.DB, r)
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+            panic("UserID is null in WithAuth protected path")
+		}
+		list := context.DB.GetListByUserID(userID)
+		pages.RenderPage("List", List(&list), nil, w, r)
+	}
+}
+func Post(context *app.AppContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, err := auth.GetUserIDFromSession(context.DB, r)
+		if err != nil {
+            panic("UserID is null in WithAuth protected path")
 		}
 		list := context.DB.GetListByUserID(userID)
 		messages := make([]pages.PageMessage, 0)
-		switch r.Method {
-		case "GET":
-		case "POST":
-			r.ParseForm()
-			fmt.Println(r)
-			name := r.Form.Get("name")
-			quanityRaw := r.Form.Get("quantity")
-			quantity, err := strconv.ParseFloat(quanityRaw, 64)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			unit := r.Form.Get("unit")
-			listItemDetails := db.ListItemDetails{
-				Name:     name,
-				Quantity: quantity,
-				Unit:     unit,
-			}
-			err = context.DB.AddToList(list.ID, listItemDetails)
-			if err != nil {
-				fmt.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			messages = append(messages, pages.PageMessage{Type: pages.Success, Value: "Item added to list", Timeout: true})
-			list = context.DB.GetListByUserID(userID)
-		case "PATCH":
-		case "DELETE":
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
+        r.ParseForm()
+        fmt.Println(r)
+        name := r.Form.Get("name")
+        quanityRaw := r.Form.Get("quantity")
+        quantity, err := strconv.ParseFloat(quanityRaw, 64)
+        if err != nil {
+            w.WriteHeader(http.StatusBadRequest)
+            return
+        }
+        unit := r.Form.Get("unit")
+        listItemDetails := db.ListItemDetails{
+            Name:     name,
+            Quantity: quantity,
+            Unit:     unit,
+        }
+        err = context.DB.AddToList(list.ID, listItemDetails)
+        if err != nil {
+            fmt.Println(err)
+            w.WriteHeader(http.StatusInternalServerError)
+            return
+        }
+        messages = append(messages, pages.PageMessage{Type: pages.Success, Value: "Item added to list", Timeout: true})
+        list = context.DB.GetListByUserID(userID)
 		pages.RenderPage("List", List(&list), messages, w, r)
 	}
 }

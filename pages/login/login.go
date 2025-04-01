@@ -7,24 +7,30 @@ import (
 	"net/http"
 )
 
-func Handler(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-		case "POST":
-			r.ParseForm()
-			username := r.FormValue("username")
-			password := r.FormValue("password")
-			if auth.Authenticate(context.DB, w, r, username, password) {
-				pages.RedirectWithMessage(w, r, "/", pages.PageMessage{Type: pages.Success, Value: "Login Success", Timeout: false})
-				return
-			} else {
-				pages.RedirectWithMessage(w, r, "/login", pages.PageMessage{Type: pages.Error, Value: "Invalid Credentials", Timeout: false})
-				return
-			}
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
 		pages.RenderPage("Login", Login(), nil, w, r)
+	}
+}
+func Post(context *app.AppContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+        target := r.FormValue("redirecttarget")
+        if target == "" {
+            target = "/"
+        }
+		if auth.Authenticate(context.DB, w, r, username, password) {
+            println("target: ", target)
+			pages.RedirectWithMessage(w, r, target, pages.PageMessage{Type: pages.Success, Value: "Login Success", Timeout: false})
+			return
+		}
+		w.WriteHeader(http.StatusUnauthorized)
+		messages := []pages.PageMessage{{
+			Value:   "Invalid Credentials",
+			Type:    pages.Error,
+			Timeout: false,
+		}}
+		pages.RenderPage("Login", Login(), messages, w, r)
 	}
 }

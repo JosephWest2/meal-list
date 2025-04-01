@@ -6,8 +6,11 @@ import (
 )
 
 
-templ Recipes(recipes []db.Recipe) {
-    for _, recipe := range recipes {
+templ recipes(dbRecipes []db.Recipe, isAdmin bool, recipeCategories []db.RecipeCategory) {
+    if isAdmin {
+        @createRecipe(recipeCategories)
+    }
+    for _, recipe := range dbRecipes {
         <a class="recipe-link" href={ templ.SafeURL("/recipes/" + strconv.FormatUint(uint64(recipe.ID), 10)) }>
             <h3>{ recipe.Name }</h3>
             <h4>{ recipe.RecipeCategory.Name }</h4>
@@ -20,9 +23,11 @@ templ Recipes(recipes []db.Recipe) {
                 method: "POST"
             });
             if (res.status == 201) {
-                alert("Successfully seeded db")
-            }
-        }
+                alert("Successfully seeded db");
+            };
+        };
     </script>
-    <button onclick="SeedDB()">Seed DB</button>
+    if isAdmin {
+        <button onclick="SeedDB()">Seed DB</button>
+    }
 }

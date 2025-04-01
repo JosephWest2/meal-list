@@ -47,15 +47,15 @@ func RenderPage(pageTitle string, pageComponent templ.Component, messages []Page
 	}
 	warningQuery := r.URL.Query()["warning"]
 	if warningQuery != nil {
-		messages = append(messages, PageMessage{Type: Warning, Value: messageQuery[0]})
+		messages = append(messages, PageMessage{Type: Warning, Value: warningQuery[0]})
 	}
 	successQuery := r.URL.Query()["success"]
 	if successQuery != nil {
-		messages = append(messages, PageMessage{Type: Success, Value: messageQuery[0]})
+		messages = append(messages, PageMessage{Type: Success, Value: successQuery[0]})
 	}
 	errorQuery := r.URL.Query()["error"]
 	if errorQuery != nil {
-		messages = append(messages, PageMessage{Type: Error, Value: messageQuery[0]})
+		messages = append(messages, PageMessage{Type: Error, Value: errorQuery[0]})
 	}
 	isLoggedIn := auth.IsLoggedInUnverified(r)
 	page := Layout(pageTitle, messages, isLoggedIn, pageComponent)

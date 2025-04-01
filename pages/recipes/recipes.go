@@ -2,21 +2,30 @@ package recipes
 
 import (
 	"josephwest2/meal-list/lib/app"
+	"josephwest2/meal-list/lib/auth"
 	"josephwest2/meal-list/lib/db"
 	"josephwest2/meal-list/pages"
 	"net/http"
 )
 
-func Handler(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			recipes := context.DB.GetRecipes(&db.RecipeQueryParams{})
-			pages.RenderPage("Recipes", Recipes(recipes), nil, w, r)
-		case "POST":
-
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
+        dbRecipes := context.DB.GetRecipes(&db.RecipeQueryParams{})
+        isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole);
+        var categories []db.RecipeCategory
+        if isAdmin {
+            categories, _ = context.DB.GetAllCategories()
+        }
+        pages.RenderPage("Recipes", recipes(dbRecipes, isAdmin, categories), nil, w, r)
 	}
+}
+
+func Post(context *app.AppContext) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole);
+        if !isAdmin {
+            w.WriteHeader(http.StatusUnauthorized)
+            return
+        }
+    }
 }

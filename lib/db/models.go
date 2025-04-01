@@ -84,10 +84,6 @@ type IngredientCategory struct {
 
 type Role uint
 
-const (
-	StandardUser Role = iota
-	Admin
-)
 
 type User struct {
 	ID           uint

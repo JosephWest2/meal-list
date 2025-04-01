@@ -39,6 +39,15 @@ func (db *DB) GetRecipeByID(id uint) (*Recipe, error) {
 	return &recipe, nil
 }
 
+func (db *DB) GetAllCategories() ([]RecipeCategory, error) {
+    var categories []RecipeCategory
+    err := db.gormdb.Find(categories).Error
+    if err != nil {
+        return nil, err
+    }
+    return categories, nil
+}
+
 func (db *DB) GetRecipes(recipeQueryParams *RecipeQueryParams) []Recipe {
 	var recipes []Recipe
 	var query = db.gormdb.Model(&Recipe{}).Limit(10)
@@ -78,6 +87,15 @@ func (db *DB) GetUserByUsername(username string) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (db *DB) GetUserByID(id uint) (*User, error) {
+    var user User
+    err := db.gormdb.Model(&User{}).Where("id = ?", id).First(&user).Error
+    if err != nil {
+        return nil, err
+    }
+    return &user, nil
 }
 
 func (db *DB) CreateUser(username string, passwordUnhashed string, role Role) error {

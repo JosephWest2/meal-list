@@ -7,16 +7,14 @@ import (
 	"net/http"
 )
 
-func Handler(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			pages.RenderPage("Logout", Logout(), nil, w, r)
-		case "POST":
-			auth.Logout(context.DB, w, r)
-			http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
+        pages.RenderPage("Logout", Logout(), nil, w, r)
+	}
+}
+func Post(context *app.AppContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+        auth.Logout(context.DB, w, r)
+        http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)
 	}
 }

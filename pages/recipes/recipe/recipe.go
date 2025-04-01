@@ -9,12 +9,10 @@ import (
 	"strings"
 )
 
-func Handler(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		success := true
-		url := r.URL.Path
-		slashIndex := strings.LastIndex(url, "/")
-		id, err := strconv.ParseUint(url[slashIndex+1:], 10, 32)
+        id, err := strconv.ParseUint(r.PathValue("id"), 10, 32)
 		if err != nil {
 			success = false
 		}

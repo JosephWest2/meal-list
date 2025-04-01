@@ -30,19 +30,29 @@ func main() {
 	context := app.AppContext{DB: &dbRef}
 
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	// pages
-	mux.HandleFunc("/", index.Handler)
-	mux.HandleFunc("/recipes", recipes.Handler(&context))
-	mux.HandleFunc("/recipes/", recipe.Handler(&context))
-	mux.HandleFunc("/login", login.Handler(&context))
-	mux.HandleFunc("/register", register.Handler(&context))
-	mux.HandleFunc("/logout", auth.WithAuth(db.StandardUser, &context, logout.Handler(&context)))
-	mux.HandleFunc("/list", auth.WithAuth(db.StandardUser, &context, list.Handler(&context)))
+	mux.HandleFunc("GET /", index.Handler)
+
+	mux.HandleFunc("GET /recipes", recipes.Get(&context))
+    mux.HandleFunc("POST /recipes", auth.WithAuth(auth.AdminRole, &context, recipes.Post(&context)))
+	mux.HandleFunc("GET /recipes/{id}", recipe.Get(&context))
+
+	mux.HandleFunc("GET /login", login.Get(&context))
+	mux.HandleFunc("POST /login", login.Post(&context))
+
+	mux.HandleFunc("GET /register", register.Get(&context))
+	mux.HandleFunc("POST /register", register.Post(&context))
+
+	mux.HandleFunc("GET /logout", auth.WithAuth(auth.StandardUserRole, &context, logout.Get(&context)))
+	mux.HandleFunc("POST /logout", auth.WithAuth(auth.StandardUserRole, &context, logout.Post(&context)))
+
+	mux.HandleFunc("GET /list", auth.WithAuth(auth.StandardUserRole, &context, list.Get(&context)))
+	mux.HandleFunc("POST /list", auth.WithAuth(auth.StandardUserRole, &context, list.Post(&context)))
 
 	// apis
-	mux.HandleFunc("/api/seed", seed.Handler(&context))
+	mux.HandleFunc("POST /api/seed", seed.Handler(&context))
 
 	http.ListenAndServe(":3000", mux)
 }
