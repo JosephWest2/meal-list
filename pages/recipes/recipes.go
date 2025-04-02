@@ -19,6 +19,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
         if isAdmin {
             categories, _ = context.DB.GetAllCategories()
             f, err := os.Open("./static/recipe-images/")
+            defer f.Close()
             if err != nil {
                 panic("failed to read recipe-images directory")
             }
