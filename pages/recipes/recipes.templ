@@ -6,15 +6,15 @@ import (
 )
 
 
-templ recipes(dbRecipes []db.Recipe, isAdmin bool, recipeCategories []db.RecipeCategory) {
+templ recipes(dbRecipes []db.Recipe, isAdmin bool, recipeCategories []db.RecipeCategory, imageNames []string) {
     if isAdmin {
-        @createRecipe(recipeCategories)
+        @createRecipe(recipeCategories, imageNames)
     }
     for _, recipe := range dbRecipes {
         <a class="recipe-link" href={ templ.SafeURL("/recipes/" + strconv.FormatUint(uint64(recipe.ID), 10)) }>
             <h3>{ recipe.Name }</h3>
             <h4>{ recipe.RecipeCategory.Name }</h4>
-            <img class="image-thumbnail" src={ "/static/recipe-images/" + recipe.ImageRef } alt={ recipe.Name }>
+            <img class="image-thumbnail" src={ "/static/recipe-images/" + recipe.ImageName } alt={ recipe.Name }>
         </a>
     }
     <script>

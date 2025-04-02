@@ -37,6 +37,7 @@ func main() {
 
 	mux.HandleFunc("GET /recipes", recipes.Get(&context))
     mux.HandleFunc("POST /recipes", auth.WithAuth(auth.AdminRole, &context, recipes.Post(&context)))
+
 	mux.HandleFunc("GET /recipes/{id}", recipe.Get(&context))
 
 	mux.HandleFunc("GET /login", login.Get(&context))
@@ -52,7 +53,7 @@ func main() {
 	mux.HandleFunc("POST /list", auth.WithAuth(auth.StandardUserRole, &context, list.Post(&context)))
 
 	// apis
-	mux.HandleFunc("POST /api/seed", seed.Handler(&context))
+	mux.HandleFunc("POST /api/seed", auth.WithAuth(auth.AdminRole, &context, seed.Post(&context)))
 
 	http.ListenAndServe(":3000", mux)
 }

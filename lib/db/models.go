@@ -32,7 +32,7 @@ type Recipe struct {
 	Directions           string
 	RecipeCategoryID     uint
 	RecipeCategory       RecipeCategory
-	ImageRef             string
+	ImageName             string
 	RecipeSourceURL      string
 }
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Handler(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Seed request received")
 		if r.Method != "POST" {
@@ -15,6 +15,6 @@ func Handler(context *app.AppContext) http.HandlerFunc {
 		}
 		context.DB.Seed()
 		w.WriteHeader(http.StatusCreated)
-
+        w.Write([]byte("Successfully seeded db"))
 	}
 }

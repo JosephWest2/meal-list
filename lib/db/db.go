@@ -41,7 +41,7 @@ func (db *DB) GetRecipeByID(id uint) (*Recipe, error) {
 
 func (db *DB) GetAllCategories() ([]RecipeCategory, error) {
     var categories []RecipeCategory
-    err := db.gormdb.Find(categories).Error
+    err := db.gormdb.Find(&categories).Error
     if err != nil {
         return nil, err
     }

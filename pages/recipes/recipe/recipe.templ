@@ -9,7 +9,7 @@ templ Recipe(recipe db.Recipe, directionsParsed []string) {
     <h2>{ recipe.Name }</h2>
     <h3>Category { recipe.RecipeCategory.Name }</h3>
     <a target="_blank" class="inline-link" href={ templ.SafeURL(recipe.RecipeSourceURL) }>Source</a>
-    <img class="recipe-image" src={ "/static/recipe-images/" + recipe.ImageRef } alt={ "Image of " + recipe.Name }>
+    <img class="recipe-image" src={ "/static/recipe-images/" + recipe.ImageName } alt={ "Image of " + recipe.Name }>
     <h3>Ingredients</h3>
     <table class="ingredient-table">
         <tr>

@@ -137,7 +137,7 @@ func (db *DB) Seed() {
 				4. Layer & bake: Layer the meat sauce, cheese mixture, and lasagna noodles, then bake until the top is golden brown.	
 			`,
 			RecipeSourceURL: "https://www.spendwithpennies.com/easy-homemade-lasagna/",
-			ImageRef:        "lasagna.jpg",
+			ImageName:        "lasagna.jpg",
 			RecipeCategory:  mealCategory,
 			IngredientQuantities: []IngredientQuantity{
 				{
@@ -194,7 +194,7 @@ func (db *DB) Seed() {
 				7. Repeat with remaining batter.	
 			`,
 			RecipeSourceURL: "https://www.allrecipes.com/recipe/21014/good-old-fashioned-pancakes/",
-			ImageRef:        "pancakes.jpg",
+			ImageName:        "pancakes.jpg",
 			RecipeCategory:  breakfastCategory,
 			IngredientQuantities: []IngredientQuantity{
 				{
