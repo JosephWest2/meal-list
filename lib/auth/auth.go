@@ -13,7 +13,7 @@ import (
 )
 
 const authCookieName = "meal-list-auth"
-const sessionTimeout = 30 * time.Minute
+const sessionTimeout = 24 * time.Hour
 
 const (
 	StandardUserRole db.Role = 0

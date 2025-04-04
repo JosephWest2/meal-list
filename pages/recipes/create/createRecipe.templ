@@ -1,0 +1,172 @@
+package create
+
+import (
+	"josephwest2/meal-list/lib/db"
+    "strconv"
+)
+
+templ createRecipe(categories []db.RecipeCategory, units []db.Unit) {
+    <h2>Create Recipe</h2>
+    <div class="col">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+        <label for="category">Category:</label>
+        <select id="category" name="category">
+        for _, category := range categories {
+            <option value={strconv.FormatUint(uint64(category.ID), 10)}>{category.Name}</option>
+        }
+        </select>
+        <label for="recipe-source-url">Source URL (optional):</label>
+        <input type="text" id="recipe-source-url" name="recipe-source-url">
+        <label for="image">Image:</label>
+        <input class="textbox" type="file" id="image">
+        <label for="directions">Directions (dispalyed as written):</label>
+        <textarea id="directions" name="directions" rows="10" cols="60"></textarea>
+        <p>Ingredients:</p>
+        <div id="ingredients-form" class="row">
+            <label for="ingredient-name">Name:</label>
+            <input type="text" name="ingredient-name" id="ingredient-name">
+            <label for="ingredient-amount">Amount:</label>
+            <input type="number" name="ingredient-amount" id="ingredient-amount">
+            <label for="ingredient-unit">Unit (optional):</label>
+            <input list="ingredient-unit-options" id="ingredient-unit" name="ingredient-unit">
+            <datalist id="ingredient-unit-options">
+            for _, unit := range units {
+                <option value={unit.Name}></option>
+            }
+            </datalist>
+            <button class="btn" onclick="addIngredientToRecipe()">Add</button>
+        </div>
+        <div id="ingredients-container" class="col"></div>
+        <button class="btn" onclick="createRecipe()">Create</button>
+    </div>
+
+    <script>
+        function removeIngredient(id) {
+            ingredientElement = document.querySelector(`[data-ingredient-id='${id}']`)
+            ingredientElement.remove()
+        }
+
+        var ingredientId = 0;
+        function addIngredientToRecipe() {
+            const ingredientsFormElement = document.getElementById("ingredients-form");
+            const ingredientNameElement = document.getElementById("ingredient-name");
+            const name = ingredientNameElement.value;
+            const ingredientAmountElement = document.getElementById("ingredient-amount");
+            const amount = ingredientAmountElement.value;
+            const ingredientUnitElement = document.getElementById("ingredient-unit");
+            let unit = ingredientUnitElement.value;
+            
+            failedMessage = ""
+            if (!name) {
+                failedMessage += "ingredient name required\n";
+            }
+            if (!amount) {
+                failedMessage += "ingredient amount required\n";
+            }
+
+            const availableUnits = new Set();
+            document.querySelectorAll("#ingredient-unit-options option").forEach(element => {
+                availableUnits.add(element.value);
+            })
+    
+            if (unit == "") {
+                unit = "piece"
+            } else if (!availableUnits.has(unit)) {
+                failedMessage += "invalid unit: " + unit + "\n";
+            }
+
+            if (failedMessage != "") {
+                alert(failedMessage);
+                return;
+            }
+
+            ingredientId++;
+            let div = document.createElement("div");
+            div.dataset.ingredientId = ingredientId;
+            div.dataset.ingredientInfo = JSON.stringify({
+                name: name,
+                amount: amount,
+                unit: unit
+            });
+            div.classList.add("row");
+            
+            let p = document.createElement("p");
+            p.textContent = name;
+            div.appendChild(p);
+            p = document.createElement("p");
+            p.textContent = amount;
+            div.appendChild(p);
+            p = document.createElement("p");
+            p.textContent = unit;
+            div.appendChild(p);
+            let b = document.createElement("button");
+            b.textContent = "delete"
+            let id = ingredientId
+            b.onclick = () => {removeIngredient(id)}
+            div.appendChild(b);
+
+            document.getElementById("ingredients-container").appendChild(div);
+
+        }
+        async function createRecipe() {
+            const nameElement = document.getElementById("name");
+            const name = nameElement.value;
+            const categoryElement = document.getElementById("category");
+            const category = categoryElement.value;
+            const directionsElement = document.getElementById("directions")
+            const directions = directionsElement.value;
+            const imageElement = document.getElementById("image")
+            const image = imageElement.files[0];
+            const recipeSourceUrlElement = document.getElementById("recipe-source-url")
+            const recipeSourceUrl = recipeSourceUrlElement.value;
+
+            failedMessage = ""
+            if (!name) {
+                failedMessage += "name required\n"
+            }
+            if (!category) {
+                failedMessage += "category required\n"
+            }
+            if (!directions) {
+                failedMessage += "directions required\n"
+            }
+            if (!image) {
+                failedMessage += "image required\n"
+            }
+            if (failedMessage != "") {
+                alert(failedMessage)
+                return
+            }
+
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("category", category);
+            formData.append("directions", directions);
+            formData.append("image", image);
+            formData.append("recipe-source-url", recipeSourceUrl);
+
+            ingredientElements = document.querySelectorAll("[data-ingredient-info]");
+            ingredientElements.forEach(e => {
+                let obj = e.dataset.ingredientInfo;
+                formData.append("ingredient[]", obj);
+            })
+
+            const response = await fetch("/recipes/create", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("Success: ", response.statusText, response.body)
+                nameElement.value = nameElement.defaultValue;
+                categoryElement.value = categoryElement.defaultValue;
+                directionsElement.value = directionsElement.defaultValue;
+                imageElement.value = imageElement.defaultValue;
+                recipeSourceUrlElement.value = recipeSourceUrlElement.defaultValue;
+            } else {
+                alert(response.statusText, response.body)
+            }
+        }
+    </script>
+}

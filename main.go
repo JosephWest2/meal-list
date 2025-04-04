@@ -10,6 +10,7 @@ import (
 	"josephwest2/meal-list/pages/login"
 	"josephwest2/meal-list/pages/logout"
 	"josephwest2/meal-list/pages/recipes"
+	createRecipe "josephwest2/meal-list/pages/recipes/create"
 	"josephwest2/meal-list/pages/recipes/recipe"
 	"josephwest2/meal-list/pages/register"
 	"log"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/joho/godotenv"
 )
+
 
 func main() {
 	err := godotenv.Load(".env")
@@ -37,6 +39,9 @@ func main() {
 
 	mux.HandleFunc("GET /recipes", recipes.Get(&context))
     mux.HandleFunc("POST /recipes", auth.WithAuth(auth.AdminRole, &context, recipes.Post(&context)))
+
+	mux.HandleFunc("GET /recipes/create", auth.WithAuth(auth.AdminRole, &context, createRecipe.Get(&context)))
+	mux.HandleFunc("POST /recipes/create", auth.WithAuth(auth.AdminRole, &context, createRecipe.Post(&context)))
 
 	mux.HandleFunc("GET /recipes/{id}", recipe.Get(&context))
 
