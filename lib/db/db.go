@@ -48,6 +48,15 @@ func (db *DB) GetAllCategories() ([]RecipeCategory, error) {
 	return categories, nil
 }
 
+func (db *DB) GetAllIngredients() ([]Ingredient, error) {
+	var ingredients []Ingredient
+	err := db.gormdb.Find(&ingredients).Error
+	if err != nil {
+		return nil, err
+	}
+	return ingredients, nil
+}
+
 func (db *DB) GetAllUnits() ([]Unit, error) {
     var units []Unit
     err := db.gormdb.Find(&units).Error

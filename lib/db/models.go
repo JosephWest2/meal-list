@@ -32,7 +32,7 @@ type Recipe struct {
 	Directions           string
 	RecipeCategoryID     uint
 	RecipeCategory       RecipeCategory
-	ImageName             string
+	ImageName            string
 	RecipeSourceURL      string
 }
 
@@ -46,8 +46,8 @@ type IngredientQuantity struct {
 	IngredientID uint
 	Ingredient   Ingredient
 	Quantity     float64
-	UnitID       uint
-	Unit         Unit
+	UnitID       *uint
+	Unit         *Unit
 }
 
 type UnitCategory uint
@@ -84,7 +84,6 @@ type IngredientCategory struct {
 
 type Role uint
 
-
 type User struct {
 	ID           uint
 	CreatedAt    time.Time
@@ -119,4 +118,6 @@ type ListItem struct {
 	UnitCategory       string
 	ConversionFactor   float64
 	IngredientCategory string
+	RecipeID           *uint
+	Recipe             *Recipe
 }

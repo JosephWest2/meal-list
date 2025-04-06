@@ -5,6 +5,7 @@ import (
 	"josephwest2/meal-list/assert"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
+	"josephwest2/meal-list/lib/db"
 	"josephwest2/meal-list/pages"
 	"net/http"
 	"os"
@@ -24,7 +25,12 @@ func Get(context *app.AppContext) http.HandlerFunc {
             w.WriteHeader(http.StatusInternalServerError)
             return
         }
-		pages.RenderPage("Recipes", createRecipe(categories, units), nil, w, r)
+        ingredients, err := context.DB.GetAllIngredients()
+        if err != nil {
+            w.WriteHeader(http.StatusInternalServerError)
+            return
+        }
+		pages.RenderPage("Recipes", createRecipe(categories, units, ingredients), nil, w, r)
 	}
 }
 
@@ -33,24 +39,26 @@ func Post(context *app.AppContext) http.HandlerFunc {
         assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Admin role required")
         r.ParseMultipartForm(5 << 20)
 
+        recipe := db.Recipe{}
+
         // Name
         name := r.FormValue("name")
-        println("name: ", name)
+        recipe.Name = name
 
         directions := r.FormValue("directions")
-        println("directions: ", directions)
+        recipe.Directions = directions
 
         category := r.FormValue("category")
-        println("category: ", category)
+        categoryInt, err := strconv.ParseUint(category, 10, 64)
+        assert.Assert(err == nil, "failed to convert category to uint")
+        recipe.RecipeCategoryID = uint(categoryInt)
 
         sourceUrl := r.FormValue("recipe-source-url")
-        println("recipe-source-url: ", sourceUrl)
+        recipe.RecipeSourceURL = sourceUrl
 
         ingredients := r.MultipartForm.Value["ingredient[]"]
-        println("ingredients: ", ingredients)
-
-        for i, ingredient := range ingredients {
-            println(strconv.FormatInt(int64(i), 10) + ": " + ingredient)
+        for _, ingredient := range ingredients {
+            println(ingredient)
         }
 
         // Image
