@@ -116,6 +116,24 @@ func (db *DB) GetUserByID(id uint) (*User, error) {
 	return &user, nil
 }
 
+func (db *DB) GetIngredientByID(id uint) (*Ingredient, error) {
+	var ingredient Ingredient
+	err := db.gormdb.Model(&Ingredient{}).Where("id = ?", id).First(&ingredient).Error
+	if err != nil {
+		return nil, err
+	}
+	return &ingredient, nil
+}
+
+func (db *DB) GetUnitByID(id uint) (*Unit, error) {
+	var unit Unit
+	err := db.gormdb.Model(&Unit{}).Where("id = ?", id).First(&unit).Error
+	if err != nil {
+		return nil, err
+	}
+	return &unit, nil
+}
+
 func (db *DB) CreateUser(username string, passwordUnhashed string, role Role) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(passwordUnhashed), bcrypt.DefaultCost)
 	if err != nil {

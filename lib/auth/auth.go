@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/rand"
 	"errors"
+	"josephwest2/meal-list/assert"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/db"
 	"net/http"
@@ -75,9 +76,10 @@ func Authenticate(db *db.DB, w http.ResponseWriter, r *http.Request, username st
         passwordCompare = user.PasswordHash
     }
     passErr := bcrypt.CompareHashAndPassword([]byte(passwordCompare), []byte(password))
-    if passErr != nil || usernameErr != nil {
+    if passErr != nil {
         return false;
     }
+    assert.Assert(usernameErr == nil, "incorrect username passed authentication")
 	sessionId := ulid.Make().String()
 	SetSessionCookie(w, sessionId)
 	db.CreateSession(sessionId, user.ID)

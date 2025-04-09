@@ -30,8 +30,8 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
                 <option value={strconv.FormatUint(uint64(ingredient.ID), 10)}>{ingredient.Name}</option>
             }
             </select>
-            <label for="ingredient-amount">Amount:</label>
-            <input type="number" name="ingredient-amount" id="ingredient-amount">
+            <label for="ingredient-quantity">Quantity:</label>
+            <input type="number" name="ingredient-quantity" id="ingredient-quantity">
             <label for="ingredient-unit">Unit (optional):</label>
             <select id="ingredient-unit" name="ingredient-unit">
             <option value="">(none)</option>
@@ -55,17 +55,18 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
         function addIngredientToRecipe() {
             const ingredientsFormElement = document.getElementById("ingredients-form");
             const ingredientNameElement = document.getElementById("ingredient-name");
-            const name = ingredientNameElement.value;
-            const ingredientAmountElement = document.getElementById("ingredient-amount");
-            const amount = ingredientAmountElement.value;
+            const ingID = ingredientNameElement.value;
+            const name = ingredientNameElement.options[ingredientNameElement.selectedIndex].text;
+            const ingredientQuantityElement = document.getElementById("ingredient-quantity");
+            const quantity = ingredientQuantityElement.value;
             const ingredientUnitElement = document.getElementById("ingredient-unit");
-            let unit = ingredientUnitElement.value;
+            let unitID = ingredientUnitElement.value;
             
             failedMessage = ""
-            if (!name) {
+            if (!ingID) {
                 failedMessage += "ingredient name required\n";
             }
-            if (!amount) {
+            if (!quantity) {
                 failedMessage += "ingredient amount required\n";
             }
 
@@ -74,11 +75,9 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
                 availableUnits.add(element.value);
             })
     
-            if (unit == "") {
-                unit = "piece"
-            } else if (!availableUnits.has(unit)) {
-                failedMessage += "invalid unit: " + unit + "\n";
-            }
+            if (unitID != "" && !availableUnits.has(unitID)) {
+                failedMessage += "invalid unit: " + unitID + "\n";
+            } 
 
             if (failedMessage != "") {
                 alert(failedMessage);
@@ -89,9 +88,9 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             let div = document.createElement("div");
             div.dataset.ingredientId = ingredientId;
             div.dataset.ingredientInfo = JSON.stringify({
-                name: name,
-                amount: amount,
-                unit: unit
+                id: ingID,
+                quantity: quantity,
+                unitid: unitID
             });
             div.classList.add("row");
             
@@ -99,15 +98,15 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             p.textContent = name;
             div.appendChild(p);
             p = document.createElement("p");
-            p.textContent = amount;
+            p.textContent = quantity;
             div.appendChild(p);
             p = document.createElement("p");
-            p.textContent = unit;
+            p.textContent = unitID;
             div.appendChild(p);
             let b = document.createElement("button");
             b.textContent = "delete"
             let id = ingredientId
-            b.onclick = () => {removeIngredient(id)}
+            b.onclick = () => {removeIngredient(ingID)}
             div.appendChild(b);
 
             document.getElementById("ingredients-container").appendChild(div);

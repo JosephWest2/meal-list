@@ -71,10 +71,10 @@ type Unit struct {
 }
 
 type Ingredient struct {
-	ID         uint
-	Name       string `gorm:"unique"`
-	CategoryID uint
-	Category   IngredientCategory
+	ID         uint `json:"id"`
+    Name       string `gorm:"unique" json:"name"`
+	CategoryID uint `json:"categoryID"`
+	Category   IngredientCategory `json:"category"`
 }
 
 type IngredientCategory struct {

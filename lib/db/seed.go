@@ -1,6 +1,8 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (db *DB) Seed() {
 
@@ -143,42 +145,42 @@ func (db *DB) Seed() {
 				{
 					Ingredient: egg,
 					Quantity:   1,
-					Unit:       piece,
+					Unit:       &piece,
 				},
 				{
 					Ingredient: milk,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 				{
 					Ingredient: ricottaCheese,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 				{
 					Ingredient: garlic,
 					Quantity:   1,
-					Unit:       piece,
+					Unit:       &piece,
 				},
 				{
 					Ingredient: beef,
 					Quantity:   1,
-					Unit:       pound,
+					Unit:       &pound,
 				},
 				{
 					Ingredient: lasagnaNoodles,
 					Quantity:   10,
-					Unit:       piece,
+					Unit:       &piece,
 				},
 				{
 					Ingredient: tomatoPaste,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 				{
 					Ingredient: italianSeasoning,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 			},
 		},
@@ -200,31 +202,33 @@ func (db *DB) Seed() {
 				{
 					Ingredient: flour,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 				{
 					Ingredient: bakingPowder,
 					Quantity:   1,
-					Unit:       teaspoon,
+					Unit:       &teaspoon,
 				},
 				{
 					Ingredient: sugar,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 				{
 					Ingredient: salt,
 					Quantity:   1,
-					Unit:       teaspoon,
+					Unit:       &teaspoon,
 				},
 				{
 					Ingredient: milk,
 					Quantity:   1,
-					Unit:       cup,
+					Unit:       &cup,
 				},
 			},
 		},
 	}
 	db.gormdb.Create(&recipes)
 	fmt.Println(recipes)
+
+    db.CreateUser("admin", "admin", 1)
 }
