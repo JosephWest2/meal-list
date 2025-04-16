@@ -71,7 +71,7 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             }
 
             const availableUnits = new Set();
-            document.querySelectorAll("#ingredient-unit-options option").forEach(element => {
+            document.querySelectorAll("#ingredient-unit option").forEach(element => {
                 availableUnits.add(element.value);
             })
     
@@ -88,9 +88,9 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             let div = document.createElement("div");
             div.dataset.ingredientId = ingredientId;
             div.dataset.ingredientInfo = JSON.stringify({
-                id: ingID,
-                quantity: quantity,
-                unitid: unitID
+                id: Number(ingID),
+                quantity: Number(quantity),
+                unitid: Number(unitID)
             });
             div.classList.add("row");
             

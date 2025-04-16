@@ -146,6 +146,22 @@ func (db *DB) CreateUser(username string, passwordUnhashed string, role Role) er
 	return nil
 }
 
+func (db *DB) CreateIngedientQuantities(ingredientQuantities []IngredientQuantity) error {
+    err := db.gormdb.Create(ingredientQuantities).Error
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (db *DB) CreateRecipe(recipe Recipe) error {
+    err := db.gormdb.Create(recipe).Error
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
 func (db *DB) UpdateUserRole(username string, role Role) error {
 	return db.gormdb.Model(&User{}).Where("username = ?", username).Update("role", role).Error
 }
