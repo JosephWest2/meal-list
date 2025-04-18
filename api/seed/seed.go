@@ -15,6 +15,6 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		}
 		context.DB.Seed()
 		w.WriteHeader(http.StatusCreated)
-        w.Write([]byte("Successfully seeded db"))
+		w.Write([]byte("Successfully seeded db"))
 	}
 }

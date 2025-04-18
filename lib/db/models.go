@@ -17,6 +17,7 @@ func migrate(db *gorm.DB) {
 		&User{},
 		&Session{},
 		&List{},
+		&ListRecipe{},
 		&ListItem{},
 	)
 }
@@ -50,17 +51,17 @@ type IngredientQuantity struct {
 	Unit         *Unit
 }
 
-type UnitCategory uint
+type UnitCategory string
 
 const (
 	// Kg Unit
-	Mass UnitCategory = iota
+	Mass UnitCategory = "Mass"
 	// L Unit
-	Volume
+	Volume UnitCategory = "Volume"
 	// unitless
-	Count
+	Count UnitCategory = "Count"
 	// unitless
-	Other
+	Other UnitCategory = "Other"
 )
 
 type Unit struct {
@@ -71,9 +72,9 @@ type Unit struct {
 }
 
 type Ingredient struct {
-	ID         uint `json:"id"`
-    Name       string `gorm:"unique" json:"name"`
-	CategoryID uint `json:"categoryID"`
+	ID         uint               `json:"id"`
+	Name       string             `gorm:"unique" json:"name"`
+	CategoryID uint               `json:"categoryID"`
 	Category   IngredientCategory `json:"category"`
 }
 
@@ -108,6 +109,15 @@ type List struct {
 	CreatedAt time.Time
 }
 
+type ListRecipe struct {
+	ID     uint
+	ListID uint
+
+	RecipeID uint
+	Recipe   Recipe
+	Quantity float64
+}
+
 type ListItem struct {
 	ID     uint
 	ListID uint
@@ -118,6 +128,6 @@ type ListItem struct {
 	UnitCategory       string
 	ConversionFactor   float64
 	IngredientCategory string
-	RecipeID           *uint
-	Recipe             *Recipe
+	ListRecipeID       *uint
+	ListRecipe         *ListRecipe
 }

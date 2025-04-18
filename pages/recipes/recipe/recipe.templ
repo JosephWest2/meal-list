@@ -31,4 +31,17 @@ templ Recipe(recipe db.Recipe, directionsParsed []string) {
         <p>{ direction }</p>
     }
     </div>
+    <button class="btn" onclick={templ.JSFuncCall("addRecipeToList", recipe.ID)}>Add to List</button>
+
+    <script>
+        async function addRecipeToList(recipeID) {
+            const res = await fetch("/api/addRecipeToList/" + recipeID, {
+                method: "POST"
+            });
+            if (res.ok) {
+                alert("Successfully added recipe to list");
+            };
+        };
+    
+    </script>
 }

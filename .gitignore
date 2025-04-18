@@ -1,3 +1,4 @@
 tmp
+static/recipe-images/
 .env
 *_templ.go

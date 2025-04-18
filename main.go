@@ -1,6 +1,7 @@
 package main
 
 import (
+	"josephwest2/meal-list/api/addRecipeToList"
 	"josephwest2/meal-list/api/seed"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
@@ -20,7 +21,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -38,7 +38,7 @@ func main() {
 	mux.HandleFunc("GET /", index.Handler)
 
 	mux.HandleFunc("GET /recipes", recipes.Get(&context))
-    mux.HandleFunc("POST /recipes", auth.WithAuth(auth.AdminRole, &context, recipes.Post(&context)))
+	mux.HandleFunc("POST /recipes", auth.WithAuth(auth.AdminRole, &context, recipes.Post(&context)))
 
 	mux.HandleFunc("GET /recipes/create", auth.WithAuth(auth.AdminRole, &context, createRecipe.Get(&context)))
 	mux.HandleFunc("POST /recipes/create", auth.WithAuth(auth.AdminRole, &context, createRecipe.Post(&context)))
@@ -59,6 +59,7 @@ func main() {
 
 	// apis
 	mux.HandleFunc("POST /api/seed", auth.WithAuth(auth.AdminRole, &context, seed.Post(&context)))
+	mux.HandleFunc("POST /api/addRecipeToList/{id}", auth.WithAuth(auth.StandardUserRole, &context, addRecipeToList.Post(&context)))
 
 	http.ListenAndServe(":3000", mux)
 }

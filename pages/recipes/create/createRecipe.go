@@ -75,12 +75,7 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			}
 			var dbUnit *db.Unit
 			if ingredientParsed.UnitID >= 0 {
-				dbUnit, err = context.DB.GetUnitByID(uint(ingredientParsed.UnitID))
-				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					println("failed to get unit from db: " + err.Error())
-					return
-				}
+				dbUnit, _ = context.DB.GetUnitByID(uint(ingredientParsed.UnitID))
 			}
 			ingredientQuantities = append(ingredientQuantities, db.IngredientQuantity{
 				Ingredient: *dbIngredient,
@@ -106,7 +101,7 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		}
 
 		dst, err := os.Create("./static/recipe-images/" + handler.Filename)
-		assert.Assert(err != nil)
+		assert.Assert(err == nil)
 		defer dst.Close()
 		io.Copy(dst, imageFile)
 
