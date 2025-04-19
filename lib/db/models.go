@@ -10,31 +10,30 @@ func migrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&IngredientCategory{},
 		&Ingredient{},
+		&RecipeIngredient{},
 		&Recipe{},
 		&RecipeCategory{},
-		&IngredientQuantity{},
 		&Unit{},
 		&User{},
 		&Session{},
 		&List{},
-		&ListRecipe{},
-		&ListItem{},
+		&ListIngredient{},
 	)
 }
 
 // Fields are converted to snake case in postgres
 
 type Recipe struct {
-	ID                   uint
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-	Name                 string               `gorm:"unique"`
-	IngredientQuantities []IngredientQuantity `gorm:"many2many:recipe_ingredients;"`
-	Directions           string
-	RecipeCategoryID     uint
-	RecipeCategory       RecipeCategory
-	ImageName            string
-	RecipeSourceURL      string
+	ID               uint
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	Name             string `gorm:"unique"`
+	Ingredients      []RecipeIngredient
+	Directions       string
+	RecipeCategoryID uint
+	RecipeCategory   RecipeCategory
+	RecipeImage      string
+	RecipeSourceURL  string
 }
 
 type RecipeCategory struct {
@@ -42,8 +41,10 @@ type RecipeCategory struct {
 	Name string `gorm:"unique"`
 }
 
-type IngredientQuantity struct {
+type RecipeIngredient struct {
 	ID           uint
+	RecipeID     uint
+	Recipe       Recipe
 	IngredientID uint
 	Ingredient   Ingredient
 	Quantity     float64
@@ -96,38 +97,32 @@ type User struct {
 
 type Session struct {
 	ID        string `gorm:"primarykey"`
-	UserID    uint
+	UserID    uint   
 	User      User
 	CreatedAt time.Time
 }
 
 type List struct {
-	ID        uint
-	ListItems []ListItem
-	UserID    uint
-	User      User
-	CreatedAt time.Time
+	ID          uint
+	Ingredients []ListIngredient
+	UserID      uint
+	User        User
+	CreatedAt   time.Time
 }
 
-type ListRecipe struct {
+type ListIngredient struct {
 	ID     uint
 	ListID uint
+	List   List
 
-	RecipeID uint
-	Recipe   Recipe
+	IngredientID uint
+	Ingredient   Ingredient
+
+	UnitID *uint
+	Unit   *Unit
+
 	Quantity float64
-}
 
-type ListItem struct {
-	ID     uint
-	ListID uint
-
-	Name               string
-	Quantity           float64
-	Unit               string
-	UnitCategory       string
-	ConversionFactor   float64
-	IngredientCategory string
-	ListRecipeID       *uint
-	ListRecipe         *ListRecipe
+	RecipeID *uint
+	Recipe   *Recipe
 }

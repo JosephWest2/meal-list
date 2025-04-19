@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func Get(context *app.AppContext) http.HandlerFunc {
@@ -57,9 +58,8 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		sourceUrl := r.FormValue("recipe-source-url")
 
 		ingredients := r.MultipartForm.Value["ingredient[]"]
-		ingredientQuantities := make([]db.IngredientQuantity, 0, len(ingredients))
+		recipeIngredients := make([]db.RecipeIngredient, 0, len(ingredients))
 		for _, ingredientString := range ingredients {
-			println(ingredientString)
 			var ingredientParsed IngredientInput
 			err := json.Unmarshal([]byte(ingredientString), &ingredientParsed)
 			if err != nil {
@@ -77,7 +77,7 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			if ingredientParsed.UnitID >= 0 {
 				dbUnit, _ = context.DB.GetUnitByID(uint(ingredientParsed.UnitID))
 			}
-			ingredientQuantities = append(ingredientQuantities, db.IngredientQuantity{
+			recipeIngredients = append(recipeIngredients, db.RecipeIngredient{
 				Ingredient: *dbIngredient,
 				Quantity:   ingredientParsed.Quantity,
 				Unit:       dbUnit,
@@ -92,15 +92,16 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		}
 		defer imageFile.Close()
 
-		creationPath := "./static/recipe-images/" + handler.Filename
+		newFileName := strings.ReplaceAll(name, " ", "_") + "." + strings.Split(handler.Filename, ".")[1]
+		creationPath := "./static/recipeImages/" + newFileName
 		_, err = os.Stat(creationPath)
 		if !os.IsNotExist(err) {
 			w.WriteHeader(http.StatusConflict)
-			w.Write([]byte("Image: " + handler.Filename + " already exists"))
+			w.Write([]byte("Image: " + newFileName + " already exists"))
 			return
 		}
 
-		dst, err := os.Create("./static/recipe-images/" + handler.Filename)
+		dst, err := os.Create("./static/recipeImages/" + newFileName)
 		assert.Assert(err == nil)
 		defer dst.Close()
 		io.Copy(dst, imageFile)
@@ -110,9 +111,9 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			Name:                 name,
 			Directions:           directions,
 			RecipeSourceURL:      sourceUrl,
-			ImageName:            handler.Filename,
 			RecipeCategoryID:     uint(categoryInt),
-			IngredientQuantities: ingredientQuantities,
+			RecipeImage:          newFileName,
+			Ingredients: recipeIngredients,
 		}
 		err = context.DB.CreateRecipe(recipe)
 		if err != nil {

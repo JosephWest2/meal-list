@@ -58,7 +58,7 @@ func main() {
 	mux.HandleFunc("POST /list", auth.WithAuth(auth.StandardUserRole, &context, list.Post(&context)))
 
 	// apis
-	mux.HandleFunc("POST /api/seed", auth.WithAuth(auth.AdminRole, &context, seed.Post(&context)))
+	mux.HandleFunc("POST /api/seed", seed.Post(&context))
 	mux.HandleFunc("POST /api/addRecipeToList/{id}", auth.WithAuth(auth.StandardUserRole, &context, addRecipeToList.Post(&context)))
 
 	http.ListenAndServe(":3000", mux)

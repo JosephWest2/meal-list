@@ -21,7 +21,6 @@ func Post(context *app.AppContext) http.HandlerFunc {
             target = "/"
         }
 		if auth.Authenticate(context.DB, w, r, username, password) {
-            println("target: ", target)
 			pages.RedirectWithMessage(w, r, target, pages.PageMessage{Type: pages.Success, Value: "Login Success", Timeout: false})
 			return
 		}

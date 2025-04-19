@@ -28,11 +28,15 @@ templ List(list *db.List) {
             </tr>
         </thead>
         <tbody>
-        for _, listItem := range list.ListItems {
+        for _, ing := range list.Ingredients {
             <tr>
-                <td>{ listItem.Name }</td>
-                <td>{ strconv.FormatFloat(listItem.Quantity, 'f', 2, 64) }</td>
-                <td>{ listItem.Unit }</td>
+                <td>{ ing.Ingredient.Name }</td>
+                <td>{ strconv.FormatFloat(ing.Quantity, 'f', 2, 64) }</td>
+                if ing.Unit == nil {
+                    <td>(none)</td>
+                } else {
+                    <td>{ ing.Unit.Name }</td>
+                }
             </tr>
         }
         </tbody>

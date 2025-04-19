@@ -22,11 +22,13 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		recipeID, err := strconv.ParseUint(recipeIDString, 10, 32)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			println(err.Error())
 			return
 		}
 		err = context.DB.AddRecipeToListOrIncrement(list.ID, uint(recipeID))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			println(err.Error())
 			return
 		}
 		w.WriteHeader(http.StatusCreated)

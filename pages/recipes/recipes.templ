@@ -10,13 +10,11 @@ templ recipes(dbRecipes []db.Recipe, isAdmin bool) {
         <a class="recipe-link" href={ templ.SafeURL("/recipes/" + strconv.FormatUint(uint64(recipe.ID), 10)) }>
             <h3>{ recipe.Name }</h3>
             <h4>{ recipe.RecipeCategory.Name }</h4>
-            <img class="image-thumbnail" src={ "/static/recipe-images/" + recipe.ImageName } alt={ recipe.Name }/>
+            <img class="image-thumbnail" src={ "/static/recipeImages/" + recipe.RecipeImage } alt={ recipe.Name }/>
         </a>
     }
-    if isAdmin {
-        <button class="btn" onclick="SeedDB()">Seed DB</button>
-        <a class="btn" href="/recipes/create">Create New</a>
-    }
+    <button class="btn" onclick="SeedDB()">Seed DB</button>
+    <a class="btn" href="/recipes/create">Create New</a>
     <script>
         async function SeedDB() {
             const res = await fetch("/api/seed", {

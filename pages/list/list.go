@@ -26,7 +26,6 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		list := context.DB.GetOrCreateListByUserID(userID)
 		messages := make([]pages.PageMessage, 0)
 		r.ParseForm()
-		fmt.Println(r)
 		name := r.Form.Get("name")
 		quanityRaw := r.Form.Get("quantity")
 		quantity, err := strconv.ParseFloat(quanityRaw, 64)

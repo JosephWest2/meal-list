@@ -1,7 +1,6 @@
 package recipe
 
 import (
-	"fmt"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/pages"
 	"net/http"
@@ -26,7 +25,6 @@ func Get(context *app.AppContext) http.HandlerFunc {
 			return
 		}
 		directionsParsed := strings.Split(recipe.Directions, "\n")
-		fmt.Println(recipe.Directions)
 		pages.RenderPage("Recipe", Recipe(*recipe, directionsParsed), nil, w, r)
 	}
 }

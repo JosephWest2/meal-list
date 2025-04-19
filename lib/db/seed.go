@@ -1,9 +1,5 @@
 package db
 
-import (
-	"fmt"
-)
-
 func (db *DB) Seed() {
 
 	// Recipe Categories
@@ -139,9 +135,9 @@ func (db *DB) Seed() {
 				4. Layer & bake: Layer the meat sauce, cheese mixture, and lasagna noodles, then bake until the top is golden brown.	
 			`,
 			RecipeSourceURL: "https://www.spendwithpennies.com/easy-homemade-lasagna/",
-			ImageName:        "lasagna.jpg",
 			RecipeCategory:  mealCategory,
-			IngredientQuantities: []IngredientQuantity{
+			RecipeImage:     "lasagna.jpg",
+			Ingredients: []RecipeIngredient{
 				{
 					Ingredient: egg,
 					Quantity:   1,
@@ -196,9 +192,9 @@ func (db *DB) Seed() {
 				7. Repeat with remaining batter.	
 			`,
 			RecipeSourceURL: "https://www.allrecipes.com/recipe/21014/good-old-fashioned-pancakes/",
-			ImageName:        "pancakes.jpg",
 			RecipeCategory:  breakfastCategory,
-			IngredientQuantities: []IngredientQuantity{
+			RecipeImage:     "pancakes.jpg",
+			Ingredients: []RecipeIngredient{
 				{
 					Ingredient: flour,
 					Quantity:   1,
@@ -228,7 +224,6 @@ func (db *DB) Seed() {
 		},
 	}
 	db.gormdb.Create(&recipes)
-	fmt.Println(recipes)
 
-    db.CreateUser("admin", "admin", 1)
+	db.CreateUser("admin", "admin", 1)
 }
