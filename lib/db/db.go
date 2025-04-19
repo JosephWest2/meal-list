@@ -39,8 +39,17 @@ func (db *DB) GetRecipeByID(id uint) (*Recipe, error) {
 	return &recipe, nil
 }
 
-func (db *DB) GetAllCategories() ([]RecipeCategory, error) {
+func (db *DB) GetAllRecipeCategories() ([]RecipeCategory, error) {
 	var categories []RecipeCategory
+	err := db.gormdb.Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
+
+func (db *DB) GetAllIngredientCategories() ([]IngredientCategory, error) {
+	var categories []IngredientCategory
 	err := db.gormdb.Find(&categories).Error
 	if err != nil {
 		return nil, err
@@ -50,7 +59,7 @@ func (db *DB) GetAllCategories() ([]RecipeCategory, error) {
 
 func (db *DB) GetAllIngredients() ([]Ingredient, error) {
 	var ingredients []Ingredient
-	err := db.gormdb.Find(&ingredients).Error
+	err := db.gormdb.Preload("Category").Find(&ingredients).Error
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,62 @@
+package ingredients
+
+import "josephwest2/meal-list/lib/db"
+import "strconv"
+
+templ Ingredients(ingredients []db.Ingredient, categories []db.IngredientCategory) {
+    // TODO ingredients page
+    <h2>Ingredients</h2>
+    <table>
+        for _, ingredient := range ingredients {
+            {{id := strconv.FormatUint(uint64(ingredient.ID), 10)}}
+            <tr>
+                <td><input data-default={ingredient.Name} disabled class="ingredient-input" type="text" value={ ingredient.Name } data-ingredient-id={id}/></td>
+                <td>
+                    <select data-default={ingredient.Category.Name} disabled class="ingredient-input" type="text" value={ ingredient.Category.Name } data-ingredient-id={id}>
+                    for _, category := range categories {
+                        if category.ID == ingredient.CategoryID {
+                            <option value={ category.Name }>{ category.Name }</option>
+                        } else {
+                            <option value={ category.Name }>{ category.Name }</option>
+                        }
+                    }
+                    </select>
+                </td>
+                <td>
+                    <button onclick={templ.JSFuncCall("ToggleEditIngredient", ingredient.ID)} data-toggle-button-id={id}>Edit</button>
+                    <button disabled onclick={templ.JSFuncCall("UpdateIngredient", ingredient.ID)} data-ingredient-id={id}>Update</button>
+                    <button disabled onclick={templ.JSFuncCall("DeleteIngredient", ingredient.ID)} data-ingredient-id={id}>Delete</button>
+                </td>
+            </tr>
+        }
+    </table>
+    <script>
+        function ToggleEditIngredient(id) {
+            const input = document.querySelector(`input[data-ingredient-id='${id}']`)
+            const select = document.querySelector(`select[data-ingredient-id='${id}']`)
+            input.disabled = !input.disabled
+            select.disabled = !select.disabled
+            const buttons = document.querySelectorAll(`button[data-ingredient-id='${id}']`)
+            buttons.forEach(button => {
+                button.disabled = !button.disabled
+            })
+            const toggleButton = document.querySelector(`button[data-toggle-button-id='${id}']`)
+            const isCancel = toggleButton.innerText == "Cancel"
+            toggleButton.innerText = toggleButton.innerText == "Edit" ? "Cancel" : "Edit"
+
+            if (isCancel) {
+                input.value = input.getAttribute("data-default")
+                select.value = select.getAttribute("data-default")
+            }
+        }
+
+        function UpdateIngredient(id) {
+            const input = document.querySelector(`input[data-ingredient-id='${id}']`)
+            const select = document.querySelector(`select[data-ingredient-id='${id}']`)
+            const name = input.value
+            const category = select.value
+        }
+    
+    </script>
+
+}

@@ -17,7 +17,7 @@ import (
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Admin role required")
-		categories, err := context.DB.GetAllCategories()
+		categories, err := context.DB.GetAllRecipeCategories()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -108,12 +108,12 @@ func Post(context *app.AppContext) http.HandlerFunc {
 
 		// recipe insertion into db
 		recipe := db.Recipe{
-			Name:                 name,
-			Directions:           directions,
-			RecipeSourceURL:      sourceUrl,
-			RecipeCategoryID:     uint(categoryInt),
-			RecipeImage:          newFileName,
-			Ingredients: recipeIngredients,
+			Name:             name,
+			Directions:       directions,
+			RecipeSourceURL:  sourceUrl,
+			RecipeCategoryID: uint(categoryInt),
+			RecipeImage:      newFileName,
+			Ingredients:      recipeIngredients,
 		}
 		err = context.DB.CreateRecipe(recipe)
 		if err != nil {

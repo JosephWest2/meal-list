@@ -7,6 +7,7 @@ import (
 	"josephwest2/meal-list/lib/auth"
 	"josephwest2/meal-list/lib/db"
 	"josephwest2/meal-list/pages/index"
+	"josephwest2/meal-list/pages/ingredients"
 	"josephwest2/meal-list/pages/list"
 	"josephwest2/meal-list/pages/login"
 	"josephwest2/meal-list/pages/logout"
@@ -56,6 +57,8 @@ func main() {
 
 	mux.HandleFunc("GET /list", auth.WithAuth(auth.StandardUserRole, &context, list.Get(&context)))
 	mux.HandleFunc("POST /list", auth.WithAuth(auth.StandardUserRole, &context, list.Post(&context)))
+
+	mux.HandleFunc("GET /ingredients", ingredients.Get(&context))
 
 	// apis
 	mux.HandleFunc("POST /api/seed", seed.Post(&context))
