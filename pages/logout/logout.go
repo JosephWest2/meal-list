@@ -9,12 +9,12 @@ import (
 
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-        pages.RenderPage("Logout", Logout(), nil, w, r)
+		pages.RenderPage("Logout", Logout(), nil, w, r)
 	}
 }
 func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-        auth.Logout(context.DB, w, r)
-        http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)
+		auth.Logout(context.DB, w, r)
+		http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)
 	}
 }

@@ -10,19 +10,19 @@ import (
 
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-        dbRecipes := context.DB.GetRecipes(&db.RecipeQueryParams{})
-        isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole);
-        pages.RenderPage("Recipes", recipes(dbRecipes, isAdmin), nil, w, r)
+		dbRecipes := context.DB.GetRecipes(&db.RecipeQueryParams{})
+		isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole)
+		pages.RenderPage("Recipes", recipes(dbRecipes, isAdmin), nil, w, r)
 	}
 }
 
 func Post(context *app.AppContext) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole);
-        if !isAdmin {
-            w.WriteHeader(http.StatusUnauthorized)
-            return
-        }
-        w.WriteHeader(http.StatusOK)
-    }
+	return func(w http.ResponseWriter, r *http.Request) {
+		isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole)
+		if !isAdmin {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}
 }

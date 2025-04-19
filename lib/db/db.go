@@ -16,6 +16,30 @@ type DB struct {
 	gormdb *gorm.DB
 }
 
+func (db *DB) DeleteIngredient(id uint) error {
+	err := db.gormdb.Unscoped().Delete(&Ingredient{ID: id}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) CreateIngredient(ingredientName string, categoryID uint) error {
+	err := db.gormdb.Create(&Ingredient{Name: ingredientName, CategoryID: categoryID}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) UpdateIngredient(id uint, newName string, newCategoryID uint) error {
+	err := db.gormdb.Model(&Ingredient{ID: id}).Updates(Ingredient{Name: newName, CategoryID: newCategoryID}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func InitDB(connectionString string) DB {
 	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
 	if err != nil {

@@ -18,6 +18,7 @@ func migrate(db *gorm.DB) {
 		&Session{},
 		&List{},
 		&ListIngredient{},
+		&CustomListItem{},
 	)
 }
 
@@ -105,6 +106,7 @@ type Session struct {
 type List struct {
 	ID          uint
 	Ingredients []ListIngredient
+	CustomListItems []CustomListItem
 	UserID      uint
 	User        User
 	CreatedAt   time.Time
@@ -125,4 +127,13 @@ type ListIngredient struct {
 
 	RecipeID *uint
 	Recipe   *Recipe
+}
+
+type CustomListItem struct {
+	ID uint
+	ListID uint
+	List List
+
+	Name string
+	Amount string
 }

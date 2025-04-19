@@ -16,10 +16,10 @@ func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
-        target := r.FormValue("redirecttarget")
-        if target == "" {
-            target = "/"
-        }
+		target := r.FormValue("redirecttarget")
+		if target == "" {
+			target = "/"
+		}
 		if auth.Authenticate(context.DB, w, r, username, password) {
 			pages.RedirectWithMessage(w, r, target, pages.PageMessage{Type: pages.Success, Value: "Login Success", Timeout: false})
 			return

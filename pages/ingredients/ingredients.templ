@@ -6,18 +6,29 @@ import "strconv"
 templ Ingredients(ingredients []db.Ingredient, categories []db.IngredientCategory) {
     // TODO ingredients page
     <h2>Ingredients</h2>
+    <form action="/ingredients" method="POST">
+        <label for="ingredient-name">Name:</label>
+        <input type="text" id="ingredient-name" name="ingredient-name" required>
+        <label for="ingredient-category">Category:</label>
+        <select id="ingredient-category" name="ingredient-category" required>
+        for _, category := range categories {
+            <option value={ strconv.FormatUint(uint64(category.ID), 10) }>{ category.Name }</option>
+        }
+        </select>
+        <button class="btn" type="submit">Create</button>
+    </form>
     <table>
         for _, ingredient := range ingredients {
             {{id := strconv.FormatUint(uint64(ingredient.ID), 10)}}
-            <tr>
+            <tr data-ingredient-id={id}>
                 <td><input data-default={ingredient.Name} disabled class="ingredient-input" type="text" value={ ingredient.Name } data-ingredient-id={id}/></td>
                 <td>
-                    <select data-default={ingredient.Category.Name} disabled class="ingredient-input" type="text" value={ ingredient.Category.Name } data-ingredient-id={id}>
+                    <select data-default={strconv.FormatUint(uint64(ingredient.CategoryID), 10)} disabled class="ingredient-input" type="text" value={ ingredient.Category.Name } data-ingredient-id={id}>
                     for _, category := range categories {
                         if category.ID == ingredient.CategoryID {
-                            <option value={ category.Name }>{ category.Name }</option>
+                            <option selected value={ strconv.FormatUint(uint64(category.ID), 10) }>{ category.Name }</option>
                         } else {
-                            <option value={ category.Name }>{ category.Name }</option>
+                            <option value={ strconv.FormatUint(uint64(category.ID), 10) }>{ category.Name }</option>
                         }
                     }
                     </select>
@@ -50,11 +61,46 @@ templ Ingredients(ingredients []db.Ingredient, categories []db.IngredientCategor
             }
         }
 
-        function UpdateIngredient(id) {
+        async function UpdateIngredient(id) {
             const input = document.querySelector(`input[data-ingredient-id='${id}']`)
             const select = document.querySelector(`select[data-ingredient-id='${id}']`)
             const name = input.value
             const category = select.value
+            console.log(name, category)
+
+            res = await fetch(`/ingredients/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    category: Number(category)
+                })
+            })
+
+            if (res.ok) {
+                alert("Success: ", res.statusText, res.body)
+                input.setAttribute("data-default", name)
+                select.setAttribute("data-default", category)
+                ToggleEditIngredient(id)
+            } else {
+                alert(res.statusText, res.body)
+            }
+
+        }
+
+        async function DeleteIngredient(id) {
+            res = await fetch(`/ingredients/${id}`, {
+                method: "DELETE"
+            })
+            if (res.ok) {
+                alert("Success: ", res.statusText, res.body)
+                document.querySelector(`tr[data-ingredient-id='${id}']`).remove()
+            } else {
+                alert(res.statusText, res.body)
+            }
+
         }
     
     </script>

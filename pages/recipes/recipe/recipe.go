@@ -11,7 +11,7 @@ import (
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		success := true
-        id, err := strconv.ParseUint(r.PathValue("id"), 10, 32)
+		id, err := strconv.ParseUint(r.PathValue("id"), 10, 32)
 		if err != nil {
 			success = false
 		}
