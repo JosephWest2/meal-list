@@ -92,6 +92,7 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		}
 		defer imageFile.Close()
 
+		// replace whitespace with underscore, append file extension
 		newFileName := strings.ReplaceAll(name, " ", "_") + "." + strings.Split(handler.Filename, ".")[1]
 		creationPath := "./static/recipeImages/" + newFileName
 		_, err = os.Stat(creationPath)

@@ -1,0 +1,14 @@
+package about
+
+import (
+	"josephwest2/meal-list/pages"
+    "net/http"
+)
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	pages.RenderPage("About", About(), nil, w, r)
+}
+
+templ About() {
+    <h4>ABOUTTTTTTTT</h4>
+}

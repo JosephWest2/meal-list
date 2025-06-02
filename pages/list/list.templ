@@ -3,7 +3,7 @@ package list
 import "josephwest2/meal-list/lib/db"
 import "strconv"
 
-templ List(list *db.List) {
+templ List(list *db.List, recipes []db.Recipe) {
     <form class="row" name="add-list-item" action="/list" method="POST">
         <div class="col">
             <label for="name">Name:</label>
@@ -19,6 +19,11 @@ templ List(list *db.List) {
         </div>
         <button class="btn" type="submit">Add</button>
     </form>
+    <ul>
+    for _, recipe := range recipes {
+        <li><a class="inline-link" href={templ.URL("recipes/" + strconv.Itoa(int(recipe.ID)))}>{ recipe.Name }</a></li>
+    }
+    </ul>
     <table>
         <thead>
             <tr>

@@ -27,6 +27,5 @@ func main() {
 	router.RegisterAPIRoutes(mux, &context)
 	router.RegisterPageRoutes(mux, &context)
 
-
 	http.ListenAndServe(":3000", mux)
 }

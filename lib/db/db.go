@@ -116,7 +116,7 @@ func (db *DB) GetRecipes(recipeQueryParams *RecipeQueryParams) []Recipe {
 
 func (db *DB) GetSessionByID(sessionID string) (*Session, error) {
 	var session Session
-	err := db.gormdb.Model(&Session{}).Where("ID = ?", sessionID).First(&session).Error
+	err := db.gormdb.Model(&Session{}).Where("id = ?", sessionID).First(&session).Error
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (db *DB) GetSessionByID(sessionID string) (*Session, error) {
 }
 
 func (db *DB) ClearSession(sessionID string) error {
-	return db.gormdb.Model(&Session{}).Where("ID = ?", sessionID).Delete(&Session{}).Error
+	return db.gormdb.Model(&Session{}).Where("id = ?", sessionID).Delete(&Session{}).Error
 }
 
 func (db *DB) CreateSession(sessionID string, userID uint) error {
@@ -179,7 +179,7 @@ func (db *DB) CreateUser(username string, passwordUnhashed string, role Role) er
 	return nil
 }
 
-func (db *DB) createRecipeIngredients(recipeIngredients []RecipeIngredient) error {
+func (db *DB) CreateRecipeIngredients(recipeIngredients []RecipeIngredient) error {
 	err := db.gormdb.Create(recipeIngredients).Error
 	if err != nil {
 		return err
@@ -248,7 +248,7 @@ func (db *DB) AddRecipeToListOrIncrement(listID uint, recipeID uint) error {
 		if contains {
 			temp := currentListIngredientsMap[recipeIngredient.IngredientID]
 			temp.Quantity += recipeIngredient.Quantity
-			err = db.gormdb.Model(&ListIngredient{}).Where("ID = ?", temp.ID).Updates(temp).Error
+			err = db.gormdb.Model(&ListIngredient{}).Where("id = ?", temp.ID).Updates(temp).Error
 			assert.Assert(err == nil, "Failed to update list item")
 		} else {
 			listIngredient := ListIngredient{
@@ -271,12 +271,33 @@ func (db *DB) RemoveFromList(listID uint, listIngredientID uint) error {
 
 func (db *DB) GetOrCreateListByUserID(userID uint) List {
 	var list List
-	err := db.gormdb.Model(&List{UserID: userID}).Preload("Ingredients").Preload("Ingredients.Ingredient").Preload("Ingredients.Unit").First(&list).Error
+	err := db.gormdb.Model(&List{UserID: userID}).Preload("CustomListItems").Preload("Ingredients").Preload("Ingredients.Ingredient").Preload("Ingredients.Unit").First(&list).Error
 	if err != nil {
 		list = List{UserID: userID}
 		db.gormdb.Create(&list)
 	}
 	return list
+}
+
+func (db *DB) GetListIngredientAssociatedRecipes(listIngredients []ListIngredient) []Recipe {
+	recipeIds := make(map[uint]struct{})
+	for _, listIngredient := range listIngredients {
+		if listIngredient.RecipeID == nil {
+			continue
+		}
+		recipeIds[*listIngredient.RecipeID] = struct{}{}
+	}
+	var recipes []Recipe
+	for id := range recipeIds {
+		var recipe Recipe
+		err := db.gormdb.Model(&Recipe{}).Where("id = ?", id).First(&recipe).Error
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		recipes = append(recipes, recipe)
+	}
+	return recipes
+
 }
 
 func (db *DB) GetListByID(listID uint) (*List, error) {
