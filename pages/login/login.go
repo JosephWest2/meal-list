@@ -9,7 +9,7 @@ import (
 
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pages.RenderPage("Login", Login(), nil, w, r)
+		pages.RenderPage(context, "Login", Login(), nil, w, r)
 	}
 }
 func Post(context *app.AppContext) http.HandlerFunc {
@@ -30,6 +30,6 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			Type:    pages.Error,
 			Timeout: false,
 		}}
-		pages.RenderPage("Login", Login(), messages, w, r)
+		pages.RenderPage(context, "Login", Login(), messages, w, r)
 	}
 }

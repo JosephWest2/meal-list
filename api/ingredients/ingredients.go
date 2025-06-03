@@ -8,8 +8,6 @@ import (
 	"strconv"
 )
 
-
-
 type IngredientParams struct {
 	Name       string `json:"name"`
 	CategoryID uint   `json:"category"`

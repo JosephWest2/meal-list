@@ -1,6 +1,7 @@
-package logout
+package recipecategories
 
 import (
+	"josephwest2/meal-list/assert"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
 	"josephwest2/meal-list/pages"
@@ -9,12 +10,14 @@ import (
 
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pages.RenderPage(context, "Logout", Logout(), nil, w, r)
+		categories, _ := context.DB.GetAllRecipeCategories()
+        pages.RenderPage(context, "Recipe Categories", RecipeCategories(categories), nil, w, r)
 	}
 }
+
 func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		auth.Logout(context.DB, w, r)
-		http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)
+		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Post to auth protected route")
+
 	}
 }

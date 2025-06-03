@@ -2,6 +2,7 @@ package pages
 
 import (
 	"context"
+	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
 	"net/http"
 	"strings"
@@ -39,7 +40,7 @@ func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, me
 	http.Redirect(w, r, path+s, http.StatusSeeOther)
 }
 
-func RenderPage(pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
+func RenderPage(appContext *app.AppContext, pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
 
 	messageQuery := r.URL.Query()["message"]
 	if messageQuery != nil {
@@ -57,7 +58,8 @@ func RenderPage(pageTitle string, pageComponent templ.Component, messages []Page
 	if errorQuery != nil {
 		messages = append(messages, PageMessage{Type: Error, Value: errorQuery[0]})
 	}
-	isLoggedIn := auth.IsLoggedInUnverified(r)
-	page := Layout(pageTitle, messages, isLoggedIn, pageComponent)
+	isLoggedIn := auth.IsAuthenticated(appContext.DB, r)
+	isAdmin := auth.IsAuthorized(appContext.DB, r, auth.AdminRole)
+	page := Layout(pageTitle, messages, isLoggedIn, isAdmin, pageComponent)
 	page.Render(context.Background(), w)
 }

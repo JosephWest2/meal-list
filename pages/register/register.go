@@ -28,7 +28,7 @@ func IsValidPassword(password string) []error {
 
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pages.RenderPage("Register", Register(), nil, w, r)
+		pages.RenderPage(context, "Register", Register(), nil, w, r)
 	}
 }
 
@@ -59,7 +59,7 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			}
 		}
 		if !registrationSuccess {
-			pages.RenderPage("Register", Register(), messages, w, r)
+			pages.RenderPage(context, "Register", Register(), messages, w, r)
 			return
 		}
 		err = context.DB.CreateUser(username, password, auth.StandardUserRole)

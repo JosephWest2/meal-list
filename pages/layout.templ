@@ -4,7 +4,7 @@ import (
     "strconv"
 )
 
-templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, pageComponent templ.Component) {
+templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, isAdmin bool, pageComponent templ.Component) {
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -19,7 +19,11 @@ templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, pag
             <a class="navitem" href="/">Home</a>
             <a class="navitem" href="/recipes">Recipes</a>
             <a class="navitem" href="/list">List</a>
-            <a class="navitem" href="/ingredients">Ingredients</a>
+            if isAdmin {
+                <a class="navitem" href="/ingredients">Ingredients</a>
+                <a class="navitem" href="/ingredientCategories">Ingredient Categories</a>
+                <a class="navitem" href="/recipeCategories">Recipe Categories</a>
+            }
             if isAuthenticated {
                 <a class="navitem" href="/logout">Logout</a>
             } else {

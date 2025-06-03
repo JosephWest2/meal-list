@@ -21,7 +21,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 			println(err.Error())
 			return
 		}
-		pages.RenderPage("Ingredients", Ingredients(ingredients, categories), nil, w, r)
+		pages.RenderPage(context, "Ingredients", Ingredients(ingredients, categories), nil, w, r)
 	}
 }
 
@@ -58,6 +58,6 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			println(err.Error())
 			return
 		}
-		pages.RenderPage("Ingredients", Ingredients(ingredients, categories), messages, w, r)
+		pages.RenderPage(context, "Ingredients", Ingredients(ingredients, categories), messages, w, r)
 	}
 }

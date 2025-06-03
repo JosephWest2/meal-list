@@ -1,0 +1,27 @@
+package recipecategories
+
+import "josephwest2/meal-list/lib/db"
+import "strconv"
+
+templ RecipeCategories(categories []db.RecipeCategory) {
+    <h1> RECIPE CATEGORIES </h1>
+    <table>
+    for _, category := range categories {
+        {{ id := strconv.FormatUint(uint64(category.ID), 10) }}
+        <tr>
+            <td>{ category.Name }</td>
+            <td>
+                <button onclick={templ.JSFuncCall("ToggleEditIngredient", category.ID)} data-toggle-button-id={id}>Edit</button>
+                <button disabled onclick={templ.JSFuncCall("UpdateIngredient", category.ID)} data-ingredient-id={id}>Update</button>
+                <button disabled onclick={templ.JSFuncCall("DeleteIngredient", category.ID)} data-ingredient-id={id}>Delete</button>
+            </td>
+        </tr>
+    }
+    </table>
+    <script>
+        function ToggleEditIngredient(id) {
+            const input = document.getElementById("ingredient-input-" + id);
+            const updateButton = document.getElementById("ingredient-update-button-" + id);
+    
+    </script>
+}

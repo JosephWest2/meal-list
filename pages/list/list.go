@@ -17,7 +17,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 		assert.Assert(err == nil, "UserID is null in WithAuth protected path")
 		list := context.DB.GetOrCreateListByUserID(userID)
 		associatedRecipes := context.DB.GetListIngredientAssociatedRecipes(list.Ingredients)
-		pages.RenderPage("List", List(&list, associatedRecipes), nil, w, r)
+		pages.RenderPage(context, "List", List(&list, associatedRecipes), nil, w, r)
 	}
 }
 func Post(context *app.AppContext) http.HandlerFunc {
@@ -49,6 +49,6 @@ func Post(context *app.AppContext) http.HandlerFunc {
 		messages = append(messages, pages.PageMessage{Type: pages.Success, Value: "Item added to list", Timeout: true})
 		list = context.DB.GetOrCreateListByUserID(userID)
 		associatedRecipes := context.DB.GetListIngredientAssociatedRecipes(list.Ingredients)
-		pages.RenderPage("List", List(&list, associatedRecipes), messages, w, r)
+		pages.RenderPage(context, "List", List(&list, associatedRecipes), messages, w, r)
 	}
 }

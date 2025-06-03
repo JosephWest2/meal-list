@@ -2,6 +2,7 @@ package list
 
 import "josephwest2/meal-list/lib/db"
 import "strconv"
+import "math"
 
 templ List(list *db.List, recipes []db.Recipe) {
     <form class="row" name="add-list-item" action="/list" method="POST">
@@ -36,7 +37,15 @@ templ List(list *db.List, recipes []db.Recipe) {
         for _, ing := range list.Ingredients {
             <tr>
                 <td>{ ing.Ingredient.Name }</td>
-                <td>{ strconv.FormatFloat(ing.Quantity, 'f', 2, 64) }</td>
+                <td> 
+                    {{ n, d := math.Modf(ing.Quantity) }}
+                    if d >= 0.01 { 
+                        {strconv.FormatFloat(ing.Quantity, 'f', 2, 64)}
+                    } else {
+                        {strconv.FormatFloat(n, 'f', 0, 64)}
+                    }
+                </td>
+
                 if ing.Unit == nil {
                     <td>(none)</td>
                 } else {

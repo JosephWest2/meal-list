@@ -2,11 +2,14 @@ package about
 
 import (
 	"josephwest2/meal-list/pages"
+    "josephwest2/meal-list/lib/app"
     "net/http"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	pages.RenderPage("About", About(), nil, w, r)
+func Get(context *app.AppContext) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        pages.RenderPage(context, "About", About(), nil, w, r)
+    }
 }
 
 templ About() {

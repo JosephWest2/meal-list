@@ -32,7 +32,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		pages.RenderPage("Recipes", createRecipe(categories, units, ingredients), nil, w, r)
+		pages.RenderPage(context, "Recipes", createRecipe(categories, units, ingredients), nil, w, r)
 	}
 }
 

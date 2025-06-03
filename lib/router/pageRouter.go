@@ -8,6 +8,7 @@ import (
 	"josephwest2/meal-list/pages/list"
 	"josephwest2/meal-list/pages/login"
 	"josephwest2/meal-list/pages/logout"
+	recipecategories "josephwest2/meal-list/pages/recipeCategories"
 	"josephwest2/meal-list/pages/recipes"
 	createRecipe "josephwest2/meal-list/pages/recipes/create"
 	"josephwest2/meal-list/pages/recipes/recipe"
@@ -17,7 +18,7 @@ import (
 
 func RegisterPageRoutes(mux *http.ServeMux, context *app.AppContext) {
 
-	mux.HandleFunc("GET /", index.Handler)
+	mux.HandleFunc("GET /", index.Get(context))
 
 	mux.HandleFunc("GET /recipes", recipes.Get(context))
 	mux.HandleFunc("POST /recipes", auth.WithAuth(auth.AdminRole, context, recipes.Post(context)))
@@ -41,5 +42,8 @@ func RegisterPageRoutes(mux *http.ServeMux, context *app.AppContext) {
 
 	mux.HandleFunc("GET /ingredients", ingredients.Get(context))
 	mux.HandleFunc("POST /ingredients", ingredients.Post(context))
+
+	mux.HandleFunc("GET /recipeCategories", auth.WithAuth(auth.AdminRole, context, recipecategories.Get(context)))
+	mux.HandleFunc("POST /recipeCategories", auth.WithAuth(auth.AdminRole, context, recipecategories.Post(context)))
 
 }

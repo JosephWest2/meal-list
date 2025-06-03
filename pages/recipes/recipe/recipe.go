@@ -21,10 +21,10 @@ func Get(context *app.AppContext) http.HandlerFunc {
 		}
 		if !success {
 			messages := []pages.PageMessage{{Type: pages.Error, Value: "Recipe not found"}}
-			pages.RenderPage("Recipe", pages.Empty(), messages, w, r)
+			pages.RenderPage(context, "Recipe", pages.Empty(), messages, w, r)
 			return
 		}
 		directionsParsed := strings.Split(recipe.Directions, "\n")
-		pages.RenderPage("Recipe", Recipe(*recipe, directionsParsed), nil, w, r)
+		pages.RenderPage(context, "Recipe", Recipe(*recipe, directionsParsed), nil, w, r)
 	}
 }

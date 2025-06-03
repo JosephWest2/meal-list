@@ -12,7 +12,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbRecipes := context.DB.GetRecipes(&db.RecipeQueryParams{})
 		isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole)
-		pages.RenderPage("Recipes", recipes(dbRecipes, isAdmin), nil, w, r)
+		pages.RenderPage(context, "Recipes", recipes(dbRecipes, isAdmin), nil, w, r)
 	}
 }
 
