@@ -114,6 +114,22 @@ func (db *DB) GetRecipes(recipeQueryParams *RecipeQueryParams) []Recipe {
 	return recipes
 }
 
+func (db *DB) DeleteRecipeCategory(id uint) error {
+	err := db.gormdb.Unscoped().Delete(&RecipeCategory{ID: id}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) UpdateRecipeCategory(id uint, name string) error {
+	err := db.gormdb.Model(&RecipeCategory{ID: id}).Update("name", name).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (db *DB) GetSessionByID(sessionID string) (*Session, error) {
 	var session Session
 	err := db.gormdb.Model(&Session{}).Where("id = ?", sessionID).First(&session).Error

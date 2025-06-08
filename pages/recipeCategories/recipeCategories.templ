@@ -8,20 +8,58 @@ templ RecipeCategories(categories []db.RecipeCategory) {
     <table>
     for _, category := range categories {
         {{ id := strconv.FormatUint(uint64(category.ID), 10) }}
-        <tr>
-            <td>{ category.Name }</td>
+        <tr data-category-id={id}>
+            <td><input data-toggleable data-default={category.Name} disabled class="ingredient-input" type="text" value={ category.Name }></td>
             <td>
-                <button onclick={templ.JSFuncCall("ToggleEditIngredient", category.ID)} data-toggle-button-id={id}>Edit</button>
-                <button disabled onclick={templ.JSFuncCall("UpdateIngredient", category.ID)} data-ingredient-id={id}>Update</button>
-                <button disabled onclick={templ.JSFuncCall("DeleteIngredient", category.ID)} data-ingredient-id={id}>Delete</button>
+                <button data-toggle-button onclick={templ.JSFuncCall("ToggleEditCategory", category.ID)}>Edit</button>
+                <button data-toggleable disabled onclick={templ.JSFuncCall("UpdateCategory", category.ID)}>Update</button>
+                <button data-toggleable disabled onclick={templ.JSFuncCall("DeleteCategory", category.ID)}>Delete</button>
             </td>
         </tr>
     }
     </table>
     <script>
-        function ToggleEditIngredient(id) {
-            const input = document.getElementById("ingredient-input-" + id);
-            const updateButton = document.getElementById("ingredient-update-button-" + id);
+        function ToggleEditCategory(id) {
+            const toggleables = document.querySelectorAll(`tr[data-category-id='${id}'] [data-toggleable]`) 
+            const toggleButton = document.querySelector(`tr[data-category-id='${id}'] button[data-toggle-button]`)
+            const isCancel = toggleButton.innerText == "Cancel"
+            toggleButton.innerText = toggleButton.innerText == "Edit" ? "Cancel" : "Edit"
+            toggleables.forEach(element => {
+                element.disabled = !element.disabled
+            })
+            if (isCancel) {
+                const input = document.querySelector(`tr[data-category-id='${id}'] input`)
+                input.value = input.getAttribute("data-default")
+            }
+        }
+        async function UpdateCategory(id) {
+            const input = document.querySelector(`tr[data-category-id='${id}'] input`)
+            const name = input.value
+
+            const data = new URLSearchParams()
+            data.append("name", name)
+
+            res = await fetch(`/recipeCategories/${id}`, {
+                method: "PATCH",
+                body: data
+            })
+            if (res.ok) {
+                alert("Success: ", res.statusText, res.body)
+                input.setAttribute("data-default", name)
+                ToggleEditCategory(id)
+            } else {
+                alert(res.statusText, res.body)
+            }
+        }
+        async function DeleteCategory(id) {
+            res = await fetch(`/recipeCategories/${id}`, {
+                method: "DELETE"
+            })
+            if (res.ok) {
+                alert("Success: ", res.statusText, res.body)
+            } else {
+                alert(res.statusText, res.body)
+            }
         }
     </script>
 }
