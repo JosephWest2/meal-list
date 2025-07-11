@@ -1,4 +1,4 @@
-package create
+package createRecipe
 
 import (
 	"josephwest2/meal-list/lib/db"
@@ -51,7 +51,7 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             ingredientElement.remove()
         }
 
-        var ingredientId = 0;
+        var addIngredientID = 0;
         function addIngredientToRecipe() {
             const ingredientsFormElement = document.getElementById("ingredients-form");
             const ingredientNameElement = document.getElementById("ingredient-name");
@@ -84,9 +84,9 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
                 return;
             }
 
-            ingredientId++;
+            addIngredientID++;
             let div = document.createElement("div");
-            div.dataset.ingredientId = ingredientId;
+            div.dataset.ingredientId = addIngredientID;
             div.dataset.ingredientInfo = JSON.stringify({
                 id: Number(ingID),
                 quantity: Number(quantity),
@@ -105,8 +105,7 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             div.appendChild(p);
             let b = document.createElement("button");
             b.textContent = "delete"
-            let id = ingredientId
-            b.onclick = () => {removeIngredient(ingID)}
+            b.onclick = () => {removeIngredient(addIngredientID)}
             div.appendChild(b);
 
             document.getElementById("ingredients-container").appendChild(div);

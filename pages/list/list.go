@@ -11,6 +11,13 @@ import (
 	"strconv"
 )
 
+func aggregateListItems(list *db.List) {
+	newListIngredients := make([]db.ListIngredient, 0)
+
+
+
+}
+
 func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, err := auth.GetUserIDFromSession(context.DB, r)

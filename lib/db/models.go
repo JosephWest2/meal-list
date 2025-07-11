@@ -44,9 +44,9 @@ type RecipeCategory struct {
 
 type RecipeIngredient struct {
 	ID           uint
-	RecipeID     uint
+	RecipeID     uint `gorm:"uniqueIndex:recipe_ingredient_index"`
 	Recipe       Recipe
-	IngredientID uint
+	IngredientID uint `gorm:"uniqueIndex:recipe_ingredient_index"`
 	Ingredient   Ingredient
 	Quantity     float64
 	UnitID       *uint
@@ -98,18 +98,37 @@ type User struct {
 
 type Session struct {
 	ID        string `gorm:"primarykey"`
-	UserID    uint   
+	UserID    uint
 	User      User
 	CreatedAt time.Time
 }
 
 type List struct {
-	ID          uint
-	Ingredients []ListIngredient
+	ID              uint
+	Ingredients     []ListIngredient
 	CustomListItems []CustomListItem
-	UserID      uint
-	User        User
-	CreatedAt   time.Time
+	UserID          uint
+	User            User
+	CreatedAt       time.Time
+}
+
+type ListIngredientRecipes struct {
+	ID uint
+	ListID uint
+	List List
+	RecipeID uint
+	Recipe Recipe
+	ListIngredientID uint
+	ListIngredient ListIngredient
+}
+
+type ListIngredientOverride struct {
+	ID uint
+	ListID uint
+	List List
+	IngredientID uint
+	Ingredient Ingredient
+	Quantity float64
 }
 
 type ListIngredient struct {
@@ -119,6 +138,9 @@ type ListIngredient struct {
 
 	IngredientID uint
 	Ingredient   Ingredient
+
+	Override bool
+	Checked bool
 
 	UnitID *uint
 	Unit   *Unit
@@ -130,10 +152,12 @@ type ListIngredient struct {
 }
 
 type CustomListItem struct {
-	ID uint
+	ID     uint
 	ListID uint
-	List List
+	List   List
 
-	Name string
+	Checked bool
+
+	Name   string
 	Amount string
 }

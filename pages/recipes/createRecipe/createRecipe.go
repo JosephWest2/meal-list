@@ -1,4 +1,4 @@
-package create
+package createRecipe
 
 import (
 	"encoding/json"
@@ -101,7 +101,11 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			w.Write([]byte("Image: " + newFileName + " already exists"))
 			return
 		}
-
+		err = os.MkdirAll("./static/recipeImages/", os.ModePerm)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		dst, err := os.Create("./static/recipeImages/" + newFileName)
 		assert.Assert(err == nil)
 		defer dst.Close()

@@ -10,7 +10,7 @@ import (
 	"josephwest2/meal-list/pages/logout"
 	recipecategories "josephwest2/meal-list/pages/recipeCategories"
 	"josephwest2/meal-list/pages/recipes"
-	createRecipe "josephwest2/meal-list/pages/recipes/create"
+	createRecipe "josephwest2/meal-list/pages/recipes/createRecipe"
 	"josephwest2/meal-list/pages/recipes/recipe"
 	"josephwest2/meal-list/pages/register"
 	"net/http"

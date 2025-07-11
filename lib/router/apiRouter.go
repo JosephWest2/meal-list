@@ -6,7 +6,7 @@ import (
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
 	"josephwest2/meal-list/api/ingredients"
-	"josephwest2/meal-list/api/recipecategories"
+	"josephwest2/meal-list/api/recipeCategories"
 	"net/http"
 )
 
@@ -17,6 +17,6 @@ func RegisterAPIRoutes(mux *http.ServeMux, context *app.AppContext) {
 	mux.HandleFunc("PATCH /ingredients/{id}", auth.WithAuth(auth.AdminRole, context, ingredients.Patch(context)))
 	mux.HandleFunc("DELETE /ingredients/{id}", auth.WithAuth(auth.AdminRole, context, ingredients.Delete(context)))
 
-	mux.HandleFunc("PATCH /recipeCategories/{id}", auth.WithAuth(auth.AdminRole, context, recipecategories.Patch(context)))
-	mux.HandleFunc("DELETE /recipeCategories/{id}", auth.WithAuth(auth.AdminRole, context, recipecategories.Delete(context)))
+	mux.HandleFunc("PATCH /recipeCategories/{id}", auth.WithAuth(auth.AdminRole, context, recipeCategories.Patch(context)))
+	mux.HandleFunc("DELETE /recipeCategories/{id}", auth.WithAuth(auth.AdminRole, context, recipeCategories.Delete(context)))
 }

@@ -1,4 +1,4 @@
-package recipecategories
+package recipeCategories
 
 import (
 	"josephwest2/meal-list/assert"
