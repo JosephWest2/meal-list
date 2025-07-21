@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pages.RenderPage(context, "Home", Index(r.URL.Path[1:]), nil, w, r)
 	}

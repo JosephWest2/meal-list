@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Seed request received")
 		if r.Method != "POST" {

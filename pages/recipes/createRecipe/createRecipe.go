@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Admin role required")
 		categories, err := context.DB.GetAllRecipeCategories()
@@ -42,7 +42,7 @@ type IngredientInput struct {
 	UnitID   int     `json:"unitid"`
 }
 
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Admin role required")
 		r.ParseMultipartForm(5 << 20)

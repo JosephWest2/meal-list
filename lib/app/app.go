@@ -1,9 +1,11 @@
 package app
 
 import (
-	"josephwest2/meal-list/lib/db"
+	"context"
+	"josephwest2/meal-list/lib/sqlc"
 )
 
-type AppContext struct {
-	DB *db.DB
+type App struct {
+	Queries      *sqlc.Queries
+	QueryContext context.Context
 }

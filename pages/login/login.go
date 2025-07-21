@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pages.RenderPage(context, "Login", Login(), nil, w, r)
 	}
 }
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")

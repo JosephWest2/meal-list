@@ -4,6 +4,7 @@ import (
 	"context"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
+	"josephwest2/meal-list/lib/sqlc"
 	"net/http"
 	"strings"
 
@@ -40,7 +41,7 @@ func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, me
 	http.Redirect(w, r, path+s, http.StatusSeeOther)
 }
 
-func RenderPage(appContext *app.AppContext, pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
+func RenderPage(app *app.App, pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
 
 	messageQuery := r.URL.Query()["message"]
 	if messageQuery != nil {
@@ -58,8 +59,8 @@ func RenderPage(appContext *app.AppContext, pageTitle string, pageComponent temp
 	if errorQuery != nil {
 		messages = append(messages, PageMessage{Type: Error, Value: errorQuery[0]})
 	}
-	isLoggedIn := auth.IsAuthenticated(appContext.DB, r)
-	isAdmin := auth.IsAuthorized(appContext.DB, r, auth.AdminRole)
+	isLoggedIn := auth.IsAuthenticated(app, r)
+	isAdmin := auth.IsAuthorized(app, r, sqlc.RoleAdmin)
 	page := Layout(pageTitle, messages, isLoggedIn, isAdmin, pageComponent)
 	page.Render(context.Background(), w)
 }

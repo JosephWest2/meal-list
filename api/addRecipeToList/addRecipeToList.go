@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthenticated(context.DB, r), "Unauthenticated user in WithAuth protected path")
 		userID, err := auth.GetUserIDFromSession(context.DB, r)

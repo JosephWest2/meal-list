@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func Patch(context *app.AppContext) http.HandlerFunc {
+func Patch(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Patch to auth protected route")
 		idString := r.PathValue("id")
@@ -40,7 +40,7 @@ func Patch(context *app.AppContext) http.HandlerFunc {
 	}
 }
 
-func Delete(context *app.AppContext) http.HandlerFunc {
+func Delete(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Patch to auth protected route")
 		idString := r.PathValue("id")

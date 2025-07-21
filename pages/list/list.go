@@ -11,14 +11,7 @@ import (
 	"strconv"
 )
 
-func aggregateListItems(list *db.List) {
-	newListIngredients := make([]db.ListIngredient, 0)
-
-
-
-}
-
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, err := auth.GetUserIDFromSession(context.DB, r)
 		assert.Assert(err == nil, "UserID is null in WithAuth protected path")
@@ -27,7 +20,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 		pages.RenderPage(context, "List", List(&list, associatedRecipes), nil, w, r)
 	}
 }
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, err := auth.GetUserIDFromSession(context.DB, r)
 		assert.Assert(err == nil, "UserID is null in WithAuth protected path")

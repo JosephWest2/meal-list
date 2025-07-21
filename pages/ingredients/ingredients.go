@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ingredients, err := context.DB.GetAllIngredients()
 		if err != nil {
@@ -25,7 +25,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 	}
 }
 
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		messages := make([]pages.PageMessage, 0)
 		r.ParseForm()

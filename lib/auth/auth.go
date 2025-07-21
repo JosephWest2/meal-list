@@ -1,11 +1,10 @@
 package auth
 
 import (
-	"crypto/rand"
 	"errors"
-	"josephwest2/meal-list/assert"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/db"
+	"josephwest2/meal-list/lib/sqlc"
 	"net/http"
 	"time"
 
@@ -21,34 +20,34 @@ const (
 	AdminRole        db.Role = 1
 )
 
-func IsAuthenticated(db *db.DB, r *http.Request) bool {
+func IsAuthenticated(app *app.App, r *http.Request) bool {
 	authCookie, err := r.Cookie(authCookieName)
 	if err != nil {
 		return false
 	}
 
-	session, err := db.GetSessionByID(authCookie.Value)
+	session, err := app.Queries.GetUserSessionBySessionID(app.QueryContext, authCookie.Value)
 	if err != nil {
 		return false
 	}
 
-	if time.Now().After(session.CreatedAt.Add(sessionTimeout)) {
-		db.ClearSession(session.ID)
+	if time.Now().After(session.LastAccess.Time.Add(sessionTimeout)) {
+		app.Queries.DeleteUserSessionBySessionID(app.QueryContext, session.ID)
 		return false
 	}
 
 	return true
 }
 
-func IsAuthorized(db *db.DB, r *http.Request, requiredRole db.Role) bool {
-	if !IsAuthenticated(db, r) {
+func IsAuthorized(app *app.App, r *http.Request, requiredRole sqlc.Role) bool {
+	if !IsAuthenticated(app, r) {
 		return false
 	}
-	session, err := db.GetSessionByID(GetSessionIDFromCookie(r))
+	session, err := app.Queries.GetUserSessionBySessionID(app.QueryContext, GetSessionIDFromCookie(r))
 	if err != nil {
 		return false
 	}
-	user, err := db.GetUserByID(session.UserID)
+	user, err := app.Queries.GetUserByID(app.QueryContext, session.UserID)
 	if err != nil {
 		return false
 	}
@@ -64,25 +63,18 @@ func Logout(db *db.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 // returns true if authentication is successful else false
-func Authenticate(db *db.DB, w http.ResponseWriter, r *http.Request, username string, password string) bool {
-	user, usernameErr := db.GetUserByUsername(username)
-	var passwordCompare string
-	// the code is structured this way to make comparison times the same for incorrect username
-	if usernameErr != nil {
-		token := make([]byte, 20)
-		rand.Read(token)
-		passwordCompare = string(token)
-	} else {
-		passwordCompare = user.PasswordHash
-	}
-	passErr := bcrypt.CompareHashAndPassword([]byte(passwordCompare), []byte(password))
-	if passErr != nil {
+func Authenticate(app *app.App, w http.ResponseWriter, r *http.Request, username string, password string) bool {
+	user, usernameErr := app.Queries.GetUserByUsername(app.QueryContext, username)
+	passErr := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if usernameErr != nil || passErr != nil {
 		return false
 	}
-	assert.Assert(usernameErr == nil, "incorrect username passed authentication")
 	sessionId := ulid.Make().String()
 	SetSessionCookie(w, sessionId)
-	db.CreateSession(sessionId, user.ID)
+	app.Queries.CreateUserSession(app.QueryContext, sqlc.CreateUserSessionParams{
+		ID: sessionId,
+		UserID:  user.ID,
+	})
 	return true
 }
 
@@ -128,16 +120,16 @@ func GetAuthCookieValue(r *http.Request) string {
 	return authCookie.Value
 }
 
-func WithAuth(requiredRole db.Role, context *app.AppContext, handler http.HandlerFunc) http.HandlerFunc {
-	if context == nil {
-		panic("context is nil and auth is required")
+func WithAuth(requiredRole sqlc.Role, app *app.App, handler http.HandlerFunc) http.HandlerFunc {
+	if app == nil {
+		panic("app is nil and auth is required")
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !IsAuthenticated(context.DB, r) {
+		if !IsAuthenticated(app, r) {
 			http.Redirect(w, r, "/login?message=Login+Required&target="+r.URL.Path, http.StatusSeeOther)
 			return
 		}
-		if !IsAuthorized(context.DB, r, requiredRole) {
+		if !IsAuthorized(app, r, requiredRole) {
 			http.Redirect(w, r, "/?message=Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -149,15 +141,15 @@ func IsLoggedInUnverified(r *http.Request) bool {
 	return GetAuthCookieValue(r) != ""
 }
 
-func GetUserIDFromSession(db *db.DB, r *http.Request) (uint, error) {
-	if !IsAuthenticated(db, r) {
+func GetUserIDFromSession(app *app.App, r *http.Request) (int32, error) {
+	if !IsAuthenticated(app, r) {
 		return 0, errors.New("not logged in")
 	}
 	sessionID := GetSessionIDFromCookie(r)
 	if sessionID == "" {
 		return 0, errors.New("not logged in")
 	}
-	session, err := db.GetSessionByID(sessionID)
+	session, err := app.Queries.GetUserSessionBySessionID(app.QueryContext, sessionID)
 	if err != nil {
 		return 0, errors.New("not logged in")
 	}

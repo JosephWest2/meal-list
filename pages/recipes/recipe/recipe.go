@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		success := true
 		id, err := strconv.ParseUint(r.PathValue("id"), 10, 32)

@@ -1,16 +1,16 @@
 -- name: DeleteIngredient :exec
-delete from ingrdients where id = $1;
+delete from ingredients where id = $1;
 
 -- name: CreateIngredient :one
-insert into ingredients (name, category_id) values ($1, $2) returning *;
+insert into ingredients (name, ingredient_category_id) values ($1, $2) returning *;
 
 -- name: UpdateIngredient :one
-update ingredients set name = $2, category_id = $3 where id = $1 returning *;
+update ingredients set name = $2, ingredient_category_id = $3 where id = $1 returning *;
 
 -- name: GetRecipe :one
 select * from recipes where id = $1;
 
---name: GetRecipeAndAssociatedData :one
+-- name: GetRecipeAndAssociatedData :one
 select * from recipes
 join recipes_to_recipe_categories on recipes.id = recipes_to_recipe_categories.recipe_id
 join recipe_categories on recipes_to_recipe_categories.recipe_category_id = recipe_categories.id
@@ -19,53 +19,55 @@ join ingredients on recipes_to_ingredients.ingredient_id = ingredients.id
 join units on ingredients.unit_id = units.id
 where recipes.id = $1;
 
---name: GetAllRecipeCategories :one
+-- name: GetAllRecipeCategories :many
 select * from recipe_categories;
 
---name: GetRecipesWithOffset :many
+-- name: GetRecipesWithOffset :many
 select * from recipes offset $1 limit $2;
 
---name: GetAllIngredientCategories :many
+-- name: GetAllIngredientCategories :many
 select * from ingredient_categories;
 
---name: GetIngredientsWithOffset :many
+-- name: GetIngredientsWithOffset :many
 select * from ingredients offset $1 limit $2;
 
---name: GetAllUnits :many
+-- name: GetAllUnits :many
 select * from units;
 
---name: GetRecipesByNameAndCategoryID :many
-select * from recipes where name = $1 and recipe_category_id = $2;
+-- name: GetRecipesByNameAndCategoryID :many
+select * from recipes_to_recipe_categories
+join recipes on recipes_to_recipe_categories.recipe_id = recipes.id 
+where recipes.name = $1 and recipes_to_recipe_categories.recipe_category_id = $2;
 
---name: DeleteRecipeCategory :exec
+-- name: DeleteRecipeCategory :exec
 delete from recipe_categories where id = $1;
 
---name: CreateRecipeCategory :one
+-- name: CreateRecipeCategory :one
 insert into recipe_categories (name) values ($1) returning *;
 
---name: UpdateRecipeCategory :one
+-- name: UpdateRecipeCategory :one
 update recipe_categories set name = $2 where id = $1 returning *;
 
---name: CreateUserSession :one
+-- name: CreateUserSession :one
 insert into user_sessions (id, user_id, last_access) values ($1, $2, now()) returning *;
 
---name: GetUserSessionBySessionID :one
+-- name: GetUserSessionBySessionID :one
 select * from user_sessions where id = $1;
 
---name: DeleteUserSessionBySessionID :exec
+-- name: DeleteUserSessionBySessionID :exec
 delete from user_sessions where id = $1;
 
---name: DeleteUserSessionByUserID :exec
+-- name: DeleteUserSessionByUserID :exec
 delete from user_sessions where user_id = $1;
 
---name: GetUserByUsername :one
+-- name: GetUserByUsername :one
 select * from users where username = $1;
 
---name: GetUserByID :one
+-- name: GetUserByID :one
 select * from users where id = $1;
 
---name: CreateUser :one
+-- name: CreateUser :one
 insert into users (username, password_hash, role) values ($1, $2, $3) returning *;
 
---name: DeleteUser :exec
+-- name: DeleteUser :exec
 delete from users where id = $1;

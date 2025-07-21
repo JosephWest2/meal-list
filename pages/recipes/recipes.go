@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbRecipes := context.DB.GetRecipes(&db.RecipeQueryParams{})
 		isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole)
@@ -16,7 +16,7 @@ func Get(context *app.AppContext) http.HandlerFunc {
 	}
 }
 
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		isAdmin := auth.IsAuthorized(context.DB, r, auth.AdminRole)
 		if !isAdmin {

@@ -26,13 +26,13 @@ func IsValidPassword(password string) []error {
 	return errs
 }
 
-func Get(context *app.AppContext) http.HandlerFunc {
+func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pages.RenderPage(context, "Register", Register(), nil, w, r)
 	}
 }
 
-func Post(context *app.AppContext) http.HandlerFunc {
+func Post(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		messages := make([]pages.PageMessage, 0)
 		r.ParseForm()
@@ -44,7 +44,7 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			registrationSuccess = false
 			w.WriteHeader(http.StatusBadRequest)
 		}
-		_, err := context.DB.GetUserByUsername(username)
+		_, err := app.DB.GetUserByUsername(username)
 		if err == nil {
 			messages = append(messages, pages.PageMessage{Type: pages.Error, Value: "Username taken"})
 			w.WriteHeader(http.StatusConflict)
@@ -59,10 +59,10 @@ func Post(context *app.AppContext) http.HandlerFunc {
 			}
 		}
 		if !registrationSuccess {
-			pages.RenderPage(context, "Register", Register(), messages, w, r)
+			pages.RenderPage(app, "Register", Register(), messages, w, r)
 			return
 		}
-		err = context.DB.CreateUser(username, password, auth.StandardUserRole)
+		err = app.DB.CreateUser(username, password, auth.StandardUserRole)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
