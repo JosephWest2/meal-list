@@ -10,14 +10,14 @@ import (
 
 func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		assert.Assert(auth.IsAuthenticated(context.DB, r), "Unauthenticated user in WithAuth protected path")
-		userID, err := auth.GetUserIDFromSession(context.DB, r)
+		assert.Assert(auth.IsAuthenticated(context, r), "Unauthenticated user in WithAuth protected path")
+		userID, err := auth.GetUserIDFromSession(context, r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
-		list := context.DB.GetOrCreateListByUserID(userID)
+		list := context.Queries.GetOrCreateListByUserID(userID)
 		recipeIDString := r.PathValue("id")
 		recipeID, err := strconv.ParseUint(recipeIDString, 10, 32)
 		if err != nil {
