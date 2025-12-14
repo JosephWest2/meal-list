@@ -20,14 +20,14 @@ func Post(context *app.App) http.HandlerFunc {
 		if target == "" {
 			target = "/"
 		}
-		if auth.Authenticate(context.DB, w, r, username, password) {
-			pages.RedirectWithMessage(w, r, target, pages.PageMessage{Type: pages.Success, Value: "Login Success", Timeout: false})
+		if auth.Authenticate(context, w, r, username, password) {
+			pages.RedirectWithMessage(w, r, target, pages.PageMessage{Type: pages.MessageSuccess, Value: "Login Success", Timeout: false})
 			return
 		}
 		w.WriteHeader(http.StatusUnauthorized)
 		messages := []pages.PageMessage{{
 			Value:   "Invalid Credentials",
-			Type:    pages.Error,
+			Type:    pages.MessageError,
 			Timeout: false,
 		}}
 		pages.RenderPage(context, "Login", Login(), messages, w, r)

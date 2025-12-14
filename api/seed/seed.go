@@ -13,7 +13,7 @@ func Post(context *app.App) http.HandlerFunc {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		context.DB.Seed()
+		context.Queries.SeedDatabase(context.QueryContext);
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte("Successfully seeded db"))
 	}

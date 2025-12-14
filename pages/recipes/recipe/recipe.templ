@@ -1,11 +1,11 @@
 package recipe
 
 import (
-    "josephwest2/meal-list/lib/db"
+    "josephwest2/meal-list/lib/sqlc"
     "strconv"
 )
 
-templ Recipe(recipe db.Recipe, directionsParsed []string) {
+templ Recipe(recipe *sqlc.Recipe, categories []sqlc.RecipeCategory, ingredients []sqlc.GetRecipeAssociatedIngredientsAndUnitsRow, directionsParsed []string) {
     <h2>{ recipe.Name }</h2>
     <h3>Category { recipe.RecipeCategory.Name }</h3>
     <a target="_blank" class="inline-link" href={ templ.SafeURL(recipe.RecipeSourceURL) }>Source</a>

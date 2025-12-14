@@ -13,18 +13,33 @@ import (
 
 func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := auth.GetUserIDFromSession(context.DB, r)
+		userID, err := auth.GetUserIDFromSession(context, r)
 		assert.Assert(err == nil, "UserID is null in WithAuth protected path")
-		list := context.DB.GetOrCreateListByUserID(userID)
-		associatedRecipes := context.DB.GetListIngredientAssociatedRecipes(list.Ingredients)
+
+		listIDString := r.URL.Query().Get("id")
+		listID, err := strconv.ParseUint(listIDString, 10, 32)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		list, err := context.Queries.GetListByID(context.QueryContext, int32(listID))
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		if list.UserID != userID {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		associatedRecipes, err := context.Queries.GetAllListAssociatedRecipes(context.QueryContext, int32(listID))
 		pages.RenderPage(context, "List", List(&list, associatedRecipes), nil, w, r)
 	}
 }
 func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := auth.GetUserIDFromSession(context.DB, r)
+		userID, err := auth.GetUserIDFromSession(context, r)
 		assert.Assert(err == nil, "UserID is null in WithAuth protected path")
-		list := context.DB.GetOrCreateListByUserID(userID)
+		list := context.Queries.GetOrCreateListByUserID(userID)
 		messages := make([]pages.PageMessage, 0)
 		r.ParseForm()
 		name := r.Form.Get("name")
@@ -46,7 +61,7 @@ func Post(context *app.App) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		messages = append(messages, pages.PageMessage{Type: pages.Success, Value: "Item added to list", Timeout: true})
+		messages = append(messages, pages.PageMessage{Type: pages.MessageSuccess, Value: "Item added to list", Timeout: true})
 		list = context.DB.GetOrCreateListByUserID(userID)
 		associatedRecipes := context.DB.GetListIngredientAssociatedRecipes(list.Ingredients)
 		pages.RenderPage(context, "List", List(&list, associatedRecipes), messages, w, r)

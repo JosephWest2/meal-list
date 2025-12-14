@@ -1,9 +1,9 @@
 package ingredients
 
-import "josephwest2/meal-list/lib/db"
+import "josephwest2/meal-list/lib/sqlc"
 import "strconv"
 
-templ Ingredients(ingredients []db.Ingredient, categories []db.IngredientCategory) {
+templ Ingredients(ingredients []sqlc.Ingredient, categories []sqlc.IngredientCategory) {
     // TODO ingredients page
     <h2>Ingredients</h2>
     <form action="/ingredients" method="POST">
@@ -66,6 +66,11 @@ templ Ingredients(ingredients []db.Ingredient, categories []db.IngredientCategor
             const name = input.value
             const category = select.value
             console.log(name, category)
+
+            const formData = new FormData()
+            formData.append("name", name)
+            formData.append("category", category)
+            formData.append("listName", )
 
             res = await fetch(`/ingredients/${id}`, {
                 method: "PATCH",

@@ -1,10 +1,10 @@
 package list
 
-import "josephwest2/meal-list/lib/db"
+import "josephwest2/meal-list/lib/sqlc"
 import "strconv"
 import "math"
 
-templ List(list *db.List, recipes []db.Recipe) {
+templ List(list *sqlc.List, recipes []sqlc.GetAllListAssociatedRecipesRow) {
     <form class="row" name="add-list-item" action="/list" method="POST">
         <div class="col">
             <label for="name">Name:</label>

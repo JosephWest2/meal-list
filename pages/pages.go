@@ -14,10 +14,10 @@ import (
 type MessageType uint
 
 const (
-	Message MessageType = iota
-	Success
-	Warning
-	Error
+	MessageInfo MessageType = iota
+	MessageSuccess
+	MessageWarning
+	MessageError
 )
 
 type PageMessage struct {
@@ -29,13 +29,13 @@ type PageMessage struct {
 func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, message PageMessage) {
 	s := strings.ReplaceAll(message.Value, " ", "+")
 	switch message.Type {
-	case Message:
+	case MessageInfo:
 		s = "?message=" + s
-	case Success:
+	case MessageSuccess:
 		s = "?success=" + s
-	case Warning:
+	case MessageWarning:
 		s = "?warning=" + s
-	case Error:
+	case MessageError:
 		s = "?error=" + s
 	}
 	http.Redirect(w, r, path+s, http.StatusSeeOther)
@@ -45,19 +45,19 @@ func RenderPage(app *app.App, pageTitle string, pageComponent templ.Component, m
 
 	messageQuery := r.URL.Query()["message"]
 	if messageQuery != nil {
-		messages = append(messages, PageMessage{Type: Message, Value: messageQuery[0]})
+		messages = append(messages, PageMessage{Type: MessageInfo, Value: messageQuery[0]})
 	}
 	warningQuery := r.URL.Query()["warning"]
 	if warningQuery != nil {
-		messages = append(messages, PageMessage{Type: Warning, Value: warningQuery[0]})
+		messages = append(messages, PageMessage{Type: MessageWarning, Value: warningQuery[0]})
 	}
 	successQuery := r.URL.Query()["success"]
 	if successQuery != nil {
-		messages = append(messages, PageMessage{Type: Success, Value: successQuery[0]})
+		messages = append(messages, PageMessage{Type: MessageSuccess, Value: successQuery[0]})
 	}
 	errorQuery := r.URL.Query()["error"]
 	if errorQuery != nil {
-		messages = append(messages, PageMessage{Type: Error, Value: errorQuery[0]})
+		messages = append(messages, PageMessage{Type: MessageError, Value: errorQuery[0]})
 	}
 	isLoggedIn := auth.IsAuthenticated(app, r)
 	isAdmin := auth.IsAuthorized(app, r, sqlc.RoleAdmin)

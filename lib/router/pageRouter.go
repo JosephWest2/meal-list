@@ -6,7 +6,7 @@ import (
 	"josephwest2/meal-list/lib/sqlc"
 	"josephwest2/meal-list/pages/index"
 	"josephwest2/meal-list/pages/ingredients"
-	"josephwest2/meal-list/pages/list"
+	"josephwest2/meal-list/pages/lists/list"
 	"josephwest2/meal-list/pages/login"
 	"josephwest2/meal-list/pages/logout"
 	recipeCategories "josephwest2/meal-list/pages/recipeCategories"
@@ -38,8 +38,8 @@ func RegisterPageRoutes(mux *http.ServeMux, context *app.App) {
 	mux.HandleFunc("GET /logout", auth.WithAuth(sqlc.RoleStandard, context, logout.Get(context)))
 	mux.HandleFunc("POST /logout", auth.WithAuth(sqlc.RoleStandard, context, logout.Post(context)))
 
-	mux.HandleFunc("GET /list", auth.WithAuth(sqlc.RoleStandard, context, list.Get(context)))
-	mux.HandleFunc("POST /list", auth.WithAuth(sqlc.RoleStandard, context, list.Post(context)))
+	mux.HandleFunc("GET /list/{id}", auth.WithAuth(sqlc.RoleStandard, context, list.Get(context)))
+	mux.HandleFunc("POST /list/{id}", auth.WithAuth(sqlc.RoleStandard, context, list.Post(context)))
 
 	mux.HandleFunc("GET /ingredients", ingredients.Get(context))
 	mux.HandleFunc("POST /ingredients", ingredients.Post(context))

@@ -1,16 +1,18 @@
 package recipes
 
 import (
-    "josephwest2/meal-list/lib/db"
+    "josephwest2/meal-list/lib/sqlc"
     "strconv"
 )
 
-templ recipes(dbRecipes []db.Recipe, isAdmin bool) {
+templ recipes(dbRecipes []sqlc.Recipe, recipeCategoryMap map[int32][]sqlc.RecipeCategory, isAdmin bool) {
     for _, recipe := range dbRecipes {
         <a class="recipe-link" href={ templ.SafeURL("/recipes/" + strconv.FormatUint(uint64(recipe.ID), 10)) }>
             <h3>{ recipe.Name }</h3>
-            <h4>{ recipe.RecipeCategory.Name }</h4>
-            <img class="image-thumbnail" src={ "/static/recipeImages/" + recipe.RecipeImage } alt={ recipe.Name }/>
+            for _, category := range recipeCategoryMap[recipe.ID] {
+                <h4>{ category.Name }</h4>
+            }
+            <img class="image-thumbnail" src={ "/static/recipeImages/" + recipe.ImageFilename } alt={ recipe.Name }/>
         </a>
     }
     <button class="btn" onclick="SeedDB()">Seed DB</button>

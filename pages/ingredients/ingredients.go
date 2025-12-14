@@ -2,20 +2,23 @@ package ingredients
 
 import (
 	"josephwest2/meal-list/lib/app"
+	"josephwest2/meal-list/lib/sqlc"
 	"josephwest2/meal-list/pages"
 	"net/http"
 	"strconv"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ingredients, err := context.DB.GetAllIngredients()
+		ingredients, err := context.Queries.GetAllIngredients(context.QueryContext)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
-		categories, err := context.DB.GetAllIngredientCategories()
+		categories, err := context.Queries.GetAllIngredientCategories(context.QueryContext)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			println(err.Error())
@@ -38,21 +41,24 @@ func Post(context *app.App) http.HandlerFunc {
 			println(err.Error())
 			return
 		}
-		err = context.DB.CreateIngredient(ingredientName, uint(categoryID))
+		_, err = context.Queries.CreateIngredient(context.QueryContext, sqlc.CreateIngredientParams{
+			Name:                 ingredientName,
+			IngredientCategoryID: pgtype.Int4{Int32: int32(categoryID), Valid: true},
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
-		messages = append(messages, pages.PageMessage{Type: pages.Success, Value: "Ingredient added", Timeout: true})
+		messages = append(messages, pages.PageMessage{Type: pages.MessageSuccess, Value: "Ingredient added", Timeout: true})
 
-		ingredients, err := context.DB.GetAllIngredients()
+		ingredients, err := context.Queries.GetAllIngredients(context.QueryContext)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
-		categories, err := context.DB.GetAllIngredientCategories()
+		categories, err := context.Queries.GetAllIngredientCategories(context.QueryContext)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			println(err.Error())

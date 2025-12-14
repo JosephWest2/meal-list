@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"josephwest2/meal-list/lib/app"
-	"josephwest2/meal-list/lib/db"
 	"josephwest2/meal-list/lib/sqlc"
 	"net/http"
 	"time"
@@ -15,39 +14,34 @@ import (
 const authCookieName = "meal-list-auth"
 const sessionTimeout = 24 * time.Hour
 
-const (
-	StandardUserRole db.Role = 0
-	AdminRole        db.Role = 1
-)
-
-func IsAuthenticated(app *app.App, r *http.Request) bool {
+func IsAuthenticated(context *app.App, r *http.Request) bool {
 	authCookie, err := r.Cookie(authCookieName)
 	if err != nil {
 		return false
 	}
 
-	session, err := app.Queries.GetUserSessionBySessionID(app.QueryContext, authCookie.Value)
+	session, err := context.Queries.GetUserSessionBySessionID(context.QueryContext, authCookie.Value)
 	if err != nil {
 		return false
 	}
 
 	if time.Now().After(session.LastAccess.Time.Add(sessionTimeout)) {
-		app.Queries.DeleteUserSessionBySessionID(app.QueryContext, session.ID)
+		context.Queries.DeleteUserSessionBySessionID(context.QueryContext, session.ID)
 		return false
 	}
 
 	return true
 }
 
-func IsAuthorized(app *app.App, r *http.Request, requiredRole sqlc.Role) bool {
-	if !IsAuthenticated(app, r) {
+func IsAuthorized(context *app.App, r *http.Request, requiredRole sqlc.Role) bool {
+	if !IsAuthenticated(context, r) {
 		return false
 	}
-	session, err := app.Queries.GetUserSessionBySessionID(app.QueryContext, GetSessionIDFromCookie(r))
+	session, err := context.Queries.GetUserSessionBySessionID(context.QueryContext, GetSessionIDFromCookie(r))
 	if err != nil {
 		return false
 	}
-	user, err := app.Queries.GetUserByID(app.QueryContext, session.UserID)
+	user, err := context.Queries.GetUserByID(context.QueryContext, session.UserID)
 	if err != nil {
 		return false
 	}
@@ -57,21 +51,26 @@ func IsAuthorized(app *app.App, r *http.Request, requiredRole sqlc.Role) bool {
 	return true
 }
 
-func Logout(db *db.DB, w http.ResponseWriter, r *http.Request) {
-	db.ClearSession(GetSessionIDFromCookie(r))
+func Logout(context *app.App, w http.ResponseWriter, r *http.Request) {
+	context.Queries.DeleteUserSessionBySessionID(context.QueryContext, GetSessionIDFromCookie(r))
 	ClearSessionCookie(w)
 }
 
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
 // returns true if authentication is successful else false
-func Authenticate(app *app.App, w http.ResponseWriter, r *http.Request, username string, password string) bool {
-	user, usernameErr := app.Queries.GetUserByUsername(app.QueryContext, username)
+func Authenticate(context *app.App, w http.ResponseWriter, r *http.Request, username string, password string) bool {
+	user, usernameErr := context.Queries.GetUserByUsername(context.QueryContext, username)
 	passErr := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if usernameErr != nil || passErr != nil {
 		return false
 	}
 	sessionId := ulid.Make().String()
 	SetSessionCookie(w, sessionId)
-	app.Queries.CreateUserSession(app.QueryContext, sqlc.CreateUserSessionParams{
+	context.Queries.CreateUserSession(context.QueryContext, sqlc.CreateUserSessionParams{
 		ID: sessionId,
 		UserID:  user.ID,
 	})
@@ -120,16 +119,16 @@ func GetAuthCookieValue(r *http.Request) string {
 	return authCookie.Value
 }
 
-func WithAuth(requiredRole sqlc.Role, app *app.App, handler http.HandlerFunc) http.HandlerFunc {
-	if app == nil {
+func WithAuth(requiredRole sqlc.Role, context *app.App, handler http.HandlerFunc) http.HandlerFunc {
+	if context == nil {
 		panic("app is nil and auth is required")
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !IsAuthenticated(app, r) {
+		if !IsAuthenticated(context, r) {
 			http.Redirect(w, r, "/login?message=Login+Required&target="+r.URL.Path, http.StatusSeeOther)
 			return
 		}
-		if !IsAuthorized(app, r, requiredRole) {
+		if !IsAuthorized(context, r, requiredRole) {
 			http.Redirect(w, r, "/?message=Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -141,15 +140,15 @@ func IsLoggedInUnverified(r *http.Request) bool {
 	return GetAuthCookieValue(r) != ""
 }
 
-func GetUserIDFromSession(app *app.App, r *http.Request) (int32, error) {
-	if !IsAuthenticated(app, r) {
+func GetUserIDFromSession(context *app.App, r *http.Request) (int32, error) {
+	if !IsAuthenticated(context, r) {
 		return 0, errors.New("not logged in")
 	}
 	sessionID := GetSessionIDFromCookie(r)
 	if sessionID == "" {
 		return 0, errors.New("not logged in")
 	}
-	session, err := app.Queries.GetUserSessionBySessionID(app.QueryContext, sessionID)
+	session, err := context.Queries.GetUserSessionBySessionID(context.QueryContext, sessionID)
 	if err != nil {
 		return 0, errors.New("not logged in")
 	}

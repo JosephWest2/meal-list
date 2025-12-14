@@ -4,6 +4,7 @@ import (
 	"errors"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
+	"josephwest2/meal-list/lib/sqlc"
 	"josephwest2/meal-list/pages"
 	"net/http"
 	"strings"
@@ -40,13 +41,13 @@ func Post(app *app.App) http.HandlerFunc {
 		password := r.FormValue("password")
 		registrationSuccess := true
 		if len(username) < 3 {
-			messages = append(messages, pages.PageMessage{Type: pages.Error, Value: "Username must be at least 3 characters"})
+			messages = append(messages, pages.PageMessage{Type: pages.MessageError, Value: "Username must be at least 3 characters"})
 			registrationSuccess = false
 			w.WriteHeader(http.StatusBadRequest)
 		}
-		_, err := app.DB.GetUserByUsername(username)
+		_, err := app.Queries.GetUserByUsername(app.QueryContext, username)
 		if err == nil {
-			messages = append(messages, pages.PageMessage{Type: pages.Error, Value: "Username taken"})
+			messages = append(messages, pages.PageMessage{Type: pages.MessageError, Value: "Username taken"})
 			w.WriteHeader(http.StatusConflict)
 			registrationSuccess = false
 		}
@@ -55,19 +56,27 @@ func Post(app *app.App) http.HandlerFunc {
 			registrationSuccess = false
 			w.WriteHeader(http.StatusBadRequest)
 			for _, err := range errs {
-				messages = append(messages, pages.PageMessage{Type: pages.Error, Value: err.Error()})
+				messages = append(messages, pages.PageMessage{Type: pages.MessageError, Value: err.Error()})
 			}
 		}
 		if !registrationSuccess {
 			pages.RenderPage(app, "Register", Register(), messages, w, r)
 			return
 		}
-		err = app.DB.CreateUser(username, password, auth.StandardUserRole)
+		passwordHash, err := auth.HashPassword(password)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		pages.RedirectWithMessage(w, r, "/login", pages.PageMessage{Type: pages.Success, Value: "Registration Success"})
+		_, err = app.Queries.CreateUser(app.QueryContext, sqlc.CreateUserParams{
+			Username:     username,
+			PasswordHash: passwordHash,
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		pages.RedirectWithMessage(w, r, "/login", pages.PageMessage{Type: pages.MessageSuccess, Value: "Registration Success"})
 		return
 
 	}

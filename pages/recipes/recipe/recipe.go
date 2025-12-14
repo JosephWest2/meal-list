@@ -15,16 +15,18 @@ func Get(context *app.App) http.HandlerFunc {
 		if err != nil {
 			success = false
 		}
-		recipe, err := context.DB.GetRecipeByID(uint(id))
+		recipe, err := context.Queries.GetRecipeByID(context.QueryContext, int32(id))
 		if err != nil {
 			success = false
 		}
+		categories, _ := context.Queries.GetRecipeAssociatedCategories(context.QueryContext, int32(id))
+		ingredients, _ := context.Queries.GetRecipeAssociatedIngredientsAndUnits(context.QueryContext, int32(id))
 		if !success {
-			messages := []pages.PageMessage{{Type: pages.Error, Value: "Recipe not found"}}
+			messages := []pages.PageMessage{{Type: pages.MessageError, Value: "Recipe not found"}}
 			pages.RenderPage(context, "Recipe", pages.Empty(), messages, w, r)
 			return
 		}
 		directionsParsed := strings.Split(recipe.Directions, "\n")
-		pages.RenderPage(context, "Recipe", Recipe(*recipe, directionsParsed), nil, w, r)
+		pages.RenderPage(context, "Recipe", Recipe(&recipe, categories, ingredients, directionsParsed), nil, w, r)
 	}
 }

@@ -1,11 +1,11 @@
 package createRecipe
 
 import (
-	"josephwest2/meal-list/lib/db"
+	"josephwest2/meal-list/lib/sqlc"
     "strconv"
 )
 
-templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients []db.Ingredient) {
+templ createRecipe(categories []sqlc.RecipeCategory, units []sqlc.Unit, ingredients []sqlc.Ingredient) {
     <h2>Create Recipe</h2>
     <div class="col">
         <label for="name">Name:</label>
@@ -115,7 +115,7 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
             const nameElement = document.getElementById("name");
             const name = nameElement.value;
             const categoryElement = document.getElementById("category");
-            const category = categoryElement.value;
+            const categoryID = categoryElement.value;
             const directionsElement = document.getElementById("directions")
             const directions = directionsElement.value;
             const imageElement = document.getElementById("image")
@@ -143,7 +143,7 @@ templ createRecipe(categories []db.RecipeCategory, units []db.Unit, ingredients 
 
             const formData = new FormData();
             formData.append("name", name);
-            formData.append("category", category);
+            formData.append("category-id", categoryID);
             formData.append("directions", directions);
             formData.append("image", image);
             formData.append("recipe-source-url", recipeSourceUrl);

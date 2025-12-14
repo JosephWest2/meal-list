@@ -96,21 +96,19 @@ func (ns NullUnitCategory) Value() (driver.Value, error) {
 	return string(ns.UnitCategory), nil
 }
 
-type CheckedListItem struct {
+type CustomListItem struct {
+	ID         int32
+	Name       pgtype.Text
+	Quantity   pgtype.Float4
+	CustomUnit pgtype.Text
+	UnitID     pgtype.Int4
+}
+
+type FreeListItem struct {
 	ID               int32
 	ListID           int32
 	IngredientID     pgtype.Int4
 	CustomListItemID pgtype.Int4
-}
-
-type CustomListItem struct {
-	ID           int32
-	ListID       int32
-	Name         pgtype.Text
-	Quantity     pgtype.Float4
-	CustomUnit   pgtype.Text
-	UnitID       pgtype.Int4
-	IngredientID pgtype.Int4
 }
 
 type Ingredient struct {
@@ -128,7 +126,7 @@ type IngredientCategory struct {
 type List struct {
 	ID        int32
 	Name      pgtype.Text
-	UserID    pgtype.Int4
+	UserID    int32
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
 }

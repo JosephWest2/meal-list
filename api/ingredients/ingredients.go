@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"io"
 	"josephwest2/meal-list/lib/app"
+	"josephwest2/meal-list/lib/sqlc"
 	"net/http"
 	"strconv"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type IngredientParams struct {
@@ -16,7 +19,7 @@ type IngredientParams struct {
 func Patch(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idString := r.PathValue("id")
-		id, err := strconv.ParseUint(idString, 10, 32)
+		id, err := strconv.ParseInt(idString, 10, 32)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -28,7 +31,11 @@ func Patch(context *app.App) http.HandlerFunc {
 		}
 		var params IngredientParams
 		json.Unmarshal(bodyBytes, &params)
-		err = context.DB.UpdateIngredient(uint(id), params.Name, params.CategoryID)
+		_, err = context.Queries.UpdateIngredient(context.QueryContext, sqlc.UpdateIngredientParams{
+			ID:                   int32(id),
+			Name:                 params.Name,
+			IngredientCategoryID: pgtype.Int4{Int32: int32(params.CategoryID), Valid: true},
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			print("Failed to update ingredient: " + err.Error())
@@ -47,7 +54,7 @@ func Delete(context *app.App) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		err = context.DB.DeleteIngredient(uint(id))
+		err = context.Queries.DeleteIngredient(context.QueryContext, int32(id))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			print("Failed to delete ingredient: " + err.Error())

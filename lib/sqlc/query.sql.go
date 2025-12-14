@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addToListRecipeQuantity = `-- name: AddToListRecipeQuantity :exec
+update lists_to_recipes set quantity = quantity + $3 where list_id = $1 and recipe_id = $2
+`
+
+type AddToListRecipeQuantityParams struct {
+	ListID   int32
+	RecipeID int32
+	Quantity float32
+}
+
+func (q *Queries) AddToListRecipeQuantity(ctx context.Context, arg AddToListRecipeQuantityParams) error {
+	_, err := q.db.Exec(ctx, addToListRecipeQuantity, arg.ListID, arg.RecipeID, arg.Quantity)
+	return err
+}
+
 const createIngredient = `-- name: CreateIngredient :one
 insert into ingredients (name, ingredient_category_id) values ($1, $2) returning id, name, ingredient_category_id, unit_id
 `
@@ -28,6 +43,76 @@ func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientPara
 		&i.Name,
 		&i.IngredientCategoryID,
 		&i.UnitID,
+	)
+	return i, err
+}
+
+const createList = `-- name: CreateList :one
+insert into lists (name, user_id) values ($1, $2) returning id, name, user_id, created_at, updated_at
+`
+
+type CreateListParams struct {
+	Name   pgtype.Text
+	UserID int32
+}
+
+func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (List, error) {
+	row := q.db.QueryRow(ctx, createList, arg.Name, arg.UserID)
+	var i List
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createListToRecipe = `-- name: CreateListToRecipe :one
+insert into lists_to_recipes (list_id, recipe_id, quantity) values ($1, $2, $3) returning list_id, recipe_id, quantity
+`
+
+type CreateListToRecipeParams struct {
+	ListID   int32
+	RecipeID int32
+	Quantity float32
+}
+
+func (q *Queries) CreateListToRecipe(ctx context.Context, arg CreateListToRecipeParams) (ListsToRecipe, error) {
+	row := q.db.QueryRow(ctx, createListToRecipe, arg.ListID, arg.RecipeID, arg.Quantity)
+	var i ListsToRecipe
+	err := row.Scan(&i.ListID, &i.RecipeID, &i.Quantity)
+	return i, err
+}
+
+const createRecipe = `-- name: CreateRecipe :one
+insert into recipes (name, directions, source_url, image_filename) values ($1, $2, $3, $4) returning id, name, directions, source_url, image_filename, created_at, updated_at
+`
+
+type CreateRecipeParams struct {
+	Name          string
+	Directions    string
+	SourceUrl     pgtype.Text
+	ImageFilename string
+}
+
+func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
+	row := q.db.QueryRow(ctx, createRecipe,
+		arg.Name,
+		arg.Directions,
+		arg.SourceUrl,
+		arg.ImageFilename,
+	)
+	var i Recipe
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Directions,
+		&i.SourceUrl,
+		&i.ImageFilename,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -152,6 +237,81 @@ func (q *Queries) GetAllIngredientCategories(ctx context.Context) ([]IngredientC
 	return items, nil
 }
 
+const getAllIngredients = `-- name: GetAllIngredients :many
+select id, name, ingredient_category_id, unit_id from ingredients
+`
+
+func (q *Queries) GetAllIngredients(ctx context.Context) ([]Ingredient, error) {
+	rows, err := q.db.Query(ctx, getAllIngredients)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Ingredient
+	for rows.Next() {
+		var i Ingredient
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.IngredientCategoryID,
+			&i.UnitID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllListAssociatedRecipes = `-- name: GetAllListAssociatedRecipes :many
+select recipes.id, recipes.name, recipes.directions, recipes.source_url, recipes.image_filename, recipes.created_at, recipes.updated_at, lists_to_recipes.quantity from lists_to_recipes
+join recipes on lists_to_recipes.recipe_id = recipes.id
+where lists_to_recipes.list_id = $1::int
+`
+
+type GetAllListAssociatedRecipesRow struct {
+	ID            int32
+	Name          string
+	Directions    string
+	SourceUrl     pgtype.Text
+	ImageFilename string
+	CreatedAt     pgtype.Timestamp
+	UpdatedAt     pgtype.Timestamp
+	Quantity      float32
+}
+
+func (q *Queries) GetAllListAssociatedRecipes(ctx context.Context, listID int32) ([]GetAllListAssociatedRecipesRow, error) {
+	rows, err := q.db.Query(ctx, getAllListAssociatedRecipes, listID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllListAssociatedRecipesRow
+	for rows.Next() {
+		var i GetAllListAssociatedRecipesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Directions,
+			&i.SourceUrl,
+			&i.ImageFilename,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Quantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllRecipeCategories = `-- name: GetAllRecipeCategories :many
 select id, name from recipe_categories
 `
@@ -200,6 +360,39 @@ func (q *Queries) GetAllUnits(ctx context.Context) ([]Unit, error) {
 	return items, nil
 }
 
+const getFreeListItemsAndFullIngredients = `-- name: GetFreeListItemsAndFullIngredients :one
+select list_id from lists
+join free_list_items on lists.id = free_list_items.list_id
+join ingredients on free_list_items.ingredient_id = ingredients.id
+join units on ingredients.unit_id = units.id
+join custom_list_items on free_list_items.custom_list_item_id = custom_list_items.id
+join units on custom_list_items.unit_id = units.id
+where lists.id = $1
+`
+
+func (q *Queries) GetFreeListItemsAndFullIngredients(ctx context.Context, id int32) (int32, error) {
+	row := q.db.QueryRow(ctx, getFreeListItemsAndFullIngredients, id)
+	var list_id int32
+	err := row.Scan(&list_id)
+	return list_id, err
+}
+
+const getIngredientByID = `-- name: GetIngredientByID :one
+select id, name, ingredient_category_id, unit_id from ingredients where id = $1
+`
+
+func (q *Queries) GetIngredientByID(ctx context.Context, id int32) (Ingredient, error) {
+	row := q.db.QueryRow(ctx, getIngredientByID, id)
+	var i Ingredient
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.IngredientCategoryID,
+		&i.UnitID,
+	)
+	return i, err
+}
+
 const getIngredientsWithOffset = `-- name: GetIngredientsWithOffset :many
 select id, name, ingredient_category_id, unit_id from ingredients offset $1 limit $2
 `
@@ -234,12 +427,19 @@ func (q *Queries) GetIngredientsWithOffset(ctx context.Context, arg GetIngredien
 	return items, nil
 }
 
-const getRecipe = `-- name: GetRecipe :one
-select id, name, directions, source_url, image_filename, created_at, updated_at from recipes where id = $1
+const getListAssociatedRecipeByID = `-- name: GetListAssociatedRecipeByID :one
+select recipes.id, recipes.name, recipes.directions, recipes.source_url, recipes.image_filename, recipes.created_at, recipes.updated_at from lists_to_recipes
+join recipes on lists_to_recipes.recipe_id = recipes.id
+where lists_to_recipes.list_id = $1::int and recipes.id = $2::int
 `
 
-func (q *Queries) GetRecipe(ctx context.Context, id int32) (Recipe, error) {
-	row := q.db.QueryRow(ctx, getRecipe, id)
+type GetListAssociatedRecipeByIDParams struct {
+	ListID   int32
+	RecipeID int32
+}
+
+func (q *Queries) GetListAssociatedRecipeByID(ctx context.Context, arg GetListAssociatedRecipeByIDParams) (Recipe, error) {
+	row := q.db.QueryRow(ctx, getListAssociatedRecipeByID, arg.ListID, arg.RecipeID)
 	var i Recipe
 	err := row.Scan(
 		&i.ID,
@@ -251,6 +451,225 @@ func (q *Queries) GetRecipe(ctx context.Context, id int32) (Recipe, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getListAssociatedRecipesAndQuantities = `-- name: GetListAssociatedRecipesAndQuantities :many
+select list_id, recipe_id, quantity, id, name, directions, source_url, image_filename, created_at, updated_at from lists_to_recipes
+join recipes on lists_to_recipes.recipe_id = recipes.id
+where lists_to_recipes.list_id = $1
+`
+
+type GetListAssociatedRecipesAndQuantitiesRow struct {
+	ListID        int32
+	RecipeID      int32
+	Quantity      float32
+	ID            int32
+	Name          string
+	Directions    string
+	SourceUrl     pgtype.Text
+	ImageFilename string
+	CreatedAt     pgtype.Timestamp
+	UpdatedAt     pgtype.Timestamp
+}
+
+func (q *Queries) GetListAssociatedRecipesAndQuantities(ctx context.Context, listID int32) ([]GetListAssociatedRecipesAndQuantitiesRow, error) {
+	rows, err := q.db.Query(ctx, getListAssociatedRecipesAndQuantities, listID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetListAssociatedRecipesAndQuantitiesRow
+	for rows.Next() {
+		var i GetListAssociatedRecipesAndQuantitiesRow
+		if err := rows.Scan(
+			&i.ListID,
+			&i.RecipeID,
+			&i.Quantity,
+			&i.ID,
+			&i.Name,
+			&i.Directions,
+			&i.SourceUrl,
+			&i.ImageFilename,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getListByID = `-- name: GetListByID :one
+select id, name, user_id, created_at, updated_at from lists where id = $1
+`
+
+func (q *Queries) GetListByID(ctx context.Context, id int32) (List, error) {
+	row := q.db.QueryRow(ctx, getListByID, id)
+	var i List
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getListByName = `-- name: GetListByName :one
+select id, name, user_id, created_at, updated_at from lists where name = $1
+`
+
+func (q *Queries) GetListByName(ctx context.Context, name pgtype.Text) (List, error) {
+	row := q.db.QueryRow(ctx, getListByName, name)
+	var i List
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getListLeftJoinListToRecipe = `-- name: GetListLeftJoinListToRecipe :one
+select lists.id, lists.name, lists.user_id, lists.created_at, lists.updated_at, lists_to_recipes.quantity from lists
+left join lists_to_recipes on lists.id = lists_to_recipes.list_id
+where lists.id = $1::int and lists_to_recipes.recipe_id = $2::int
+`
+
+type GetListLeftJoinListToRecipeParams struct {
+	ListID   int32
+	RecipeID int32
+}
+
+type GetListLeftJoinListToRecipeRow struct {
+	ID        int32
+	Name      pgtype.Text
+	UserID    int32
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
+	Quantity  pgtype.Float4
+}
+
+func (q *Queries) GetListLeftJoinListToRecipe(ctx context.Context, arg GetListLeftJoinListToRecipeParams) (GetListLeftJoinListToRecipeRow, error) {
+	row := q.db.QueryRow(ctx, getListLeftJoinListToRecipe, arg.ListID, arg.RecipeID)
+	var i GetListLeftJoinListToRecipeRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Quantity,
+	)
+	return i, err
+}
+
+const getListRecipesAndFullRecipeIngredients = `-- name: GetListRecipesAndFullRecipeIngredients :one
+select lists.id, lists.name, user_id, lists.created_at, lists.updated_at, list_id, lists_to_recipes.recipe_id, lists_to_recipes.quantity, recipes.id, recipes.name, directions, source_url, image_filename, recipes.created_at, recipes.updated_at, recipes_to_ingredients.recipe_id, ingredient_id, recipes_to_ingredients.quantity, ingredients.id, ingredients.name, ingredient_category_id, unit_id, units.id, units.name, category from lists
+join lists_to_recipes on lists.id = lists_to_recipes.list_id
+join recipes on lists_to_recipes.recipe_id = recipes.id
+join recipes_to_ingredients on recipes.id = recipes_to_ingredients.recipe_id
+join ingredients on recipes_to_ingredients.ingredient_id = ingredients.id
+join units on ingredients.unit_id = units.id
+where lists.id = $1
+`
+
+type GetListRecipesAndFullRecipeIngredientsRow struct {
+	ID                   int32
+	Name                 pgtype.Text
+	UserID               int32
+	CreatedAt            pgtype.Timestamp
+	UpdatedAt            pgtype.Timestamp
+	ListID               int32
+	RecipeID             int32
+	Quantity             float32
+	ID_2                 int32
+	Name_2               string
+	Directions           string
+	SourceUrl            pgtype.Text
+	ImageFilename        string
+	CreatedAt_2          pgtype.Timestamp
+	UpdatedAt_2          pgtype.Timestamp
+	RecipeID_2           int32
+	IngredientID         int32
+	Quantity_2           float32
+	ID_3                 int32
+	Name_3               string
+	IngredientCategoryID pgtype.Int4
+	UnitID               pgtype.Int4
+	ID_4                 int32
+	Name_4               string
+	Category             NullUnitCategory
+}
+
+func (q *Queries) GetListRecipesAndFullRecipeIngredients(ctx context.Context, id int32) (GetListRecipesAndFullRecipeIngredientsRow, error) {
+	row := q.db.QueryRow(ctx, getListRecipesAndFullRecipeIngredients, id)
+	var i GetListRecipesAndFullRecipeIngredientsRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ListID,
+		&i.RecipeID,
+		&i.Quantity,
+		&i.ID_2,
+		&i.Name_2,
+		&i.Directions,
+		&i.SourceUrl,
+		&i.ImageFilename,
+		&i.CreatedAt_2,
+		&i.UpdatedAt_2,
+		&i.RecipeID_2,
+		&i.IngredientID,
+		&i.Quantity_2,
+		&i.ID_3,
+		&i.Name_3,
+		&i.IngredientCategoryID,
+		&i.UnitID,
+		&i.ID_4,
+		&i.Name_4,
+		&i.Category,
+	)
+	return i, err
+}
+
+const getListsByUserID = `-- name: GetListsByUserID :many
+select id, name, user_id, created_at, updated_at from lists where user_id = $1
+`
+
+func (q *Queries) GetListsByUserID(ctx context.Context, userID int32) ([]List, error) {
+	rows, err := q.db.Query(ctx, getListsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []List
+	for rows.Next() {
+		var i List
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getRecipeAndAssociatedData = `-- name: GetRecipeAndAssociatedData :one
@@ -314,6 +733,102 @@ func (q *Queries) GetRecipeAndAssociatedData(ctx context.Context, id int32) (Get
 		&i.ID_5,
 		&i.Name_4,
 		&i.Category,
+	)
+	return i, err
+}
+
+const getRecipeAssociatedCategories = `-- name: GetRecipeAssociatedCategories :many
+select recipe_categories.id, recipe_categories.name from recipe_categories
+join recipes_to_recipe_categories on recipe_categories.id = recipes_to_recipe_categories.recipe_category_id
+where recipes_to_recipe_categories.recipe_id = $1
+`
+
+func (q *Queries) GetRecipeAssociatedCategories(ctx context.Context, recipeID int32) ([]RecipeCategory, error) {
+	rows, err := q.db.Query(ctx, getRecipeAssociatedCategories, recipeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RecipeCategory
+	for rows.Next() {
+		var i RecipeCategory
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getRecipeAssociatedIngredientsAndUnits = `-- name: GetRecipeAssociatedIngredientsAndUnits :many
+select ingredients.id, ingredients.name, ingredient_category_id, unit_id, recipe_id, ingredient_id, quantity, units.id, units.name, category from ingredients
+join recipes_to_ingredients on ingredients.id = recipes_to_ingredients.ingredient_id
+join units on ingredients.unit_id = units.id
+where recipes_to_ingredients.recipe_id = $1
+`
+
+type GetRecipeAssociatedIngredientsAndUnitsRow struct {
+	ID                   int32
+	Name                 string
+	IngredientCategoryID pgtype.Int4
+	UnitID               pgtype.Int4
+	RecipeID             int32
+	IngredientID         int32
+	Quantity             float32
+	ID_2                 int32
+	Name_2               string
+	Category             NullUnitCategory
+}
+
+func (q *Queries) GetRecipeAssociatedIngredientsAndUnits(ctx context.Context, recipeID int32) ([]GetRecipeAssociatedIngredientsAndUnitsRow, error) {
+	rows, err := q.db.Query(ctx, getRecipeAssociatedIngredientsAndUnits, recipeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetRecipeAssociatedIngredientsAndUnitsRow
+	for rows.Next() {
+		var i GetRecipeAssociatedIngredientsAndUnitsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.IngredientCategoryID,
+			&i.UnitID,
+			&i.RecipeID,
+			&i.IngredientID,
+			&i.Quantity,
+			&i.ID_2,
+			&i.Name_2,
+			&i.Category,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getRecipeByID = `-- name: GetRecipeByID :one
+select id, name, directions, source_url, image_filename, created_at, updated_at from recipes where id = $1
+`
+
+func (q *Queries) GetRecipeByID(ctx context.Context, id int32) (Recipe, error) {
+	row := q.db.QueryRow(ctx, getRecipeByID, id)
+	var i Recipe
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Directions,
+		&i.SourceUrl,
+		&i.ImageFilename,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -410,6 +925,17 @@ func (q *Queries) GetRecipesWithOffset(ctx context.Context, arg GetRecipesWithOf
 	return items, nil
 }
 
+const getUnitByID = `-- name: GetUnitByID :one
+select id, name, category from units where id = $1
+`
+
+func (q *Queries) GetUnitByID(ctx context.Context, id int32) (Unit, error) {
+	row := q.db.QueryRow(ctx, getUnitByID, id)
+	var i Unit
+	err := row.Scan(&i.ID, &i.Name, &i.Category)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 select id, username, password_hash, role, created_at, updated_at from users where id = $1
 `
@@ -477,6 +1003,21 @@ func (q *Queries) UpdateIngredient(ctx context.Context, arg UpdateIngredientPara
 		&i.UnitID,
 	)
 	return i, err
+}
+
+const updateListToRecipeQuantity = `-- name: UpdateListToRecipeQuantity :exec
+update lists_to_recipes set quantity = $3 where list_id = $1 and recipe_id = $2
+`
+
+type UpdateListToRecipeQuantityParams struct {
+	ListID   int32
+	RecipeID int32
+	Quantity float32
+}
+
+func (q *Queries) UpdateListToRecipeQuantity(ctx context.Context, arg UpdateListToRecipeQuantityParams) error {
+	_, err := q.db.Exec(ctx, updateListToRecipeQuantity, arg.ListID, arg.RecipeID, arg.Quantity)
+	return err
 }
 
 const updateRecipeCategory = `-- name: UpdateRecipeCategory :one

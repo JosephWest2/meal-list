@@ -1,9 +1,11 @@
 package recipeCategories
 
-import "josephwest2/meal-list/lib/db"
-import "strconv"
+import (
+    "josephwest2/meal-list/lib/sqlc"
+    "strconv"
+)
 
-templ RecipeCategories(categories []db.RecipeCategory) {
+templ RecipeCategories(categories []sqlc.RecipeCategory) {
     <h1> RECIPE CATEGORIES </h1>
     <table>
     for _, category := range categories {

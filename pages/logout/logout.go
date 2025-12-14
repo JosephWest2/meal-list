@@ -14,7 +14,7 @@ func Get(context *app.App) http.HandlerFunc {
 }
 func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		auth.Logout(context.DB, w, r)
+		auth.Logout(context, w, r)
 		http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)
 	}
 }

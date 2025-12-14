@@ -4,13 +4,14 @@ import (
 	"josephwest2/meal-list/assert"
 	"josephwest2/meal-list/lib/app"
 	"josephwest2/meal-list/lib/auth"
+	"josephwest2/meal-list/lib/sqlc"
 	"net/http"
 	"strconv"
 )
 
 func Patch(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Patch to auth protected route")
+		assert.Assert(auth.IsAuthorized(context, r, sqlc.RoleAdmin), "Patch to auth protected route")
 		idString := r.PathValue("id")
 		id, err := strconv.ParseUint(idString, 10, 32)
 		if err != nil {
@@ -29,7 +30,9 @@ func Patch(context *app.App) http.HandlerFunc {
 			print("Missing name")
 			return
 		}
-		err = context.DB.UpdateRecipeCategory(uint(id), name)
+		_, err = context.Queries.UpdateRecipeCategory(context.QueryContext, sqlc.UpdateRecipeCategoryParams{
+			ID:   int32(id),
+			Name: name})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			print("Failed to update recipe category: " + err.Error())
@@ -42,14 +45,14 @@ func Patch(context *app.App) http.HandlerFunc {
 
 func Delete(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		assert.Assert(auth.IsAuthorized(context.DB, r, auth.AdminRole), "Patch to auth protected route")
+		assert.Assert(auth.IsAuthorized(context, r, sqlc.RoleAdmin), "Patch to auth protected route")
 		idString := r.PathValue("id")
 		id, err := strconv.ParseUint(idString, 10, 32)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		err = context.DB.DeleteRecipeCategory(uint(id))
+		err = context.Queries.DeleteRecipeCategory(context.QueryContext, int32(id))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			print("Failed to delete recipe category: " + err.Error())
