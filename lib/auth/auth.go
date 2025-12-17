@@ -26,7 +26,7 @@ func IsAuthenticated(context *app.App, r *http.Request) bool {
 	}
 
 	if time.Now().After(session.LastAccess.Time.Add(sessionTimeout)) {
-		context.Queries.DeleteUserSessionBySessionID(context.QueryContext, session.ID)
+		context.Queries.DeleteUserSessionBySessionID(context.QueryContext, session.SessionID)
 		return false
 	}
 
@@ -71,8 +71,8 @@ func Authenticate(context *app.App, w http.ResponseWriter, r *http.Request, user
 	sessionId := ulid.Make().String()
 	SetSessionCookie(w, sessionId)
 	context.Queries.CreateUserSession(context.QueryContext, sqlc.CreateUserSessionParams{
-		ID: sessionId,
-		UserID:  user.ID,
+		SessionID: sessionId,
+		UserID:  user.UserID,
 	})
 	return true
 }
@@ -125,7 +125,7 @@ func WithAuth(requiredRole sqlc.Role, context *app.App, handler http.HandlerFunc
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !IsAuthenticated(context, r) {
-			http.Redirect(w, r, "/login?message=Login+Required&target="+r.URL.Path, http.StatusSeeOther)
+			http.Redirect(w, r, "/login?message=Login+Required&redirect-target="+r.URL.Path, http.StatusSeeOther)
 			return
 		}
 		if !IsAuthorized(context, r, requiredRole) {

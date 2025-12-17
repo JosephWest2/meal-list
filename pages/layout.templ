@@ -4,7 +4,7 @@ import (
     "strconv"
 )
 
-templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, isAdmin bool, pageComponent templ.Component) {
+templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, isAdmin bool, page templ.Component) {
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -15,47 +15,23 @@ templ Layout(pageTitle string, messages []PageMessage, isAuthenticated bool, isA
         <script src="/static/js/htmx.min.js"></script>
     </head>
     <body>
-        <nav>
-            <a class="navitem" href="/">Home</a>
-            <a class="navitem" href="/recipes">Recipes</a>
-            <a class="navitem" href="/list">List</a>
-            if isAdmin {
-                <a class="navitem" href="/ingredients">Ingredients</a>
-                <a class="navitem" href="/ingredientCategories">Ingredient Categories</a>
-                <a class="navitem" href="/recipeCategories">Recipe Categories</a>
-            }
-            if isAuthenticated {
-                <a class="navitem" href="/logout">Logout</a>
-            } else {
-                <a class="navitem" href="/login">Login</a>
-            }
-        </nav>
+        @nav(isAuthenticated, isAdmin)
         <main>
             <h1>{ pageTitle }</h1>
             for i, message := range messages {
                 {{ id := "message-" + strconv.Itoa(i) }}
                 switch message.Type {
                 case MessageInfo:
-                    <h3 id={ id } class="message">{ message.Value }</h3>
+                    <h3 id={ id } class="text-blue-600">{ message.Value }</h3>
                 case MessageSuccess:
-                    <h3 id={ id } class="success">{ message.Value }</h3>
+                    <h3 id={ id } class="text-green-600">{ message.Value }</h3>
                 case MessageWarning:
-                    <h3 id={ id } class="warning">{ message.Value }</h3>
+                    <h3 id={ id } class="text-yellow-600">{ message.Value }</h3>
                 case MessageError:
-                    <h3 id={ id } class="error">{ message.Value }</h3>
-                }
-                if message.Timeout {
-                    <script>
-                        function TimeoutMessage(id) {
-                            setTimeout(() => {
-                                document.getElementById(id).remove();
-                            }, 10000);
-                        }
-                    </script>
-                    @templ.JSFuncCall("TimeoutMessage", id)
+                    <h3 id={ id } class="text-red-600">{ message.Value }</h3>
                 }
             }
-            @pageComponent
+            @page
         </main>
     </body>
     </html>

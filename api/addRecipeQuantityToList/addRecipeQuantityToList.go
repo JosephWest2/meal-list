@@ -61,19 +61,19 @@ func Post(context *app.App) http.HandlerFunc {
 			return
 		}
 
-		if list.Quantity.Valid {
+		if list.ListRecipeQuantity.Valid {
 			// lists_to_recipes entry exists, increase quantity
 			context.Queries.UpdateListToRecipeQuantity(context.QueryContext, sqlc.UpdateListToRecipeQuantityParams{
-				Quantity: float32(quantity) + list.Quantity.Float32,
-				ListID: list.ID,
+				ListRecipeQuantity: float32(quantity) + list.ListRecipeQuantity.Float32,
+				ListID: list.ListID,
 				RecipeID: int32(recipeID),
 			})
 		} else {
 			// list_to_recipes entry does not exist, create it
 			context.Queries.CreateListToRecipe(context.QueryContext, sqlc.CreateListToRecipeParams{
-				ListID: list.ID,
+				ListID: list.ListID,
 				RecipeID: int32(recipeID),
-				Quantity: float32(quantity),
+				ListRecipeQuantity: float32(quantity),
 			})
 		}
 

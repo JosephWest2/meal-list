@@ -17,11 +17,11 @@ func Get(context *app.App) http.HandlerFunc {
 
 		recipeCategoryMap := make(map[int32][]sqlc.RecipeCategory)
 		for _, recipe := range dbRecipes {
-			categories, err := context.Queries.GetRecipeAssociatedCategories(context.QueryContext, recipe.ID)
+			categories, err := context.Queries.GetRecipeAssociatedCategories(context.QueryContext, recipe.RecipeID)
 			if err != nil {
 				continue
 			}
-			recipeCategoryMap[recipe.ID] = categories
+			recipeCategoryMap[recipe.RecipeID] = categories
 		}
 
 		if err != nil {

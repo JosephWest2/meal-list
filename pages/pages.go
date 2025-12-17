@@ -23,14 +23,13 @@ const (
 type PageMessage struct {
 	Value   string
 	Type    MessageType
-	Timeout bool
 }
 
 func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, message PageMessage) {
 	s := strings.ReplaceAll(message.Value, " ", "+")
 	switch message.Type {
 	case MessageInfo:
-		s = "?message=" + s
+		s = "?info=" + s
 	case MessageSuccess:
 		s = "?success=" + s
 	case MessageWarning:
@@ -43,7 +42,7 @@ func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, me
 
 func RenderPage(app *app.App, pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
 
-	messageQuery := r.URL.Query()["message"]
+	messageQuery := r.URL.Query()["info"]
 	if messageQuery != nil {
 		messages = append(messages, PageMessage{Type: MessageInfo, Value: messageQuery[0]})
 	}

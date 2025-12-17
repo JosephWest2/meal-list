@@ -9,13 +9,13 @@ templ RecipeCategories(categories []sqlc.RecipeCategory) {
     <h1> RECIPE CATEGORIES </h1>
     <table>
     for _, category := range categories {
-        {{ id := strconv.FormatUint(uint64(category.ID), 10) }}
+        {{ id := strconv.FormatUint(uint64(category.RecipeCategoryID), 10) }}
         <tr data-category-id={id}>
-            <td><input data-toggleable data-default={category.Name} disabled class="ingredient-input" type="text" value={ category.Name }></td>
+            <td><input data-toggleable data-default={category.RecipeCategoryName} disabled class="ingredient-input" type="text" value={ category.RecipeCategoryName }></td>
             <td>
-                <button data-toggle-button onclick={templ.JSFuncCall("ToggleEditCategory", category.ID)}>Edit</button>
-                <button data-toggleable disabled onclick={templ.JSFuncCall("UpdateCategory", category.ID)}>Update</button>
-                <button data-toggleable disabled onclick={templ.JSFuncCall("DeleteCategory", category.ID)}>Delete</button>
+                <button data-toggle-button onclick={templ.JSFuncCall("ToggleEditCategory", category.RecipeCategoryID)}>Edit</button>
+                <button data-toggleable disabled onclick={templ.JSFuncCall("UpdateCategory", category.RecipeCategoryID)}>Update</button>
+                <button data-toggleable disabled onclick={templ.JSFuncCall("DeleteCategory", category.RecipeCategoryID)}>Delete</button>
             </td>
         </tr>
     }

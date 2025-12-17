@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type IngredientParams struct {
@@ -32,9 +31,8 @@ func Patch(context *app.App) http.HandlerFunc {
 		var params IngredientParams
 		json.Unmarshal(bodyBytes, &params)
 		_, err = context.Queries.UpdateIngredient(context.QueryContext, sqlc.UpdateIngredientParams{
-			ID:                   int32(id),
-			Name:                 params.Name,
-			IngredientCategoryID: pgtype.Int4{Int32: int32(params.CategoryID), Valid: true},
+			IngredientID:                   int32(id),
+			IngredientName:                 params.Name,
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

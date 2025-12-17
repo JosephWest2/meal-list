@@ -4,7 +4,7 @@ create type role as enum (
 );
 
 create table if not exists users (
-    id serial primary key,
+    user_id serial primary key,
     username varchar(255) unique not null,
     password_hash varchar(255) not null,
     role role not null default 'standard',
@@ -14,19 +14,19 @@ create table if not exists users (
 );
 
 create table if not exists user_sessions (
-    id varchar(255) primary key,
-    user_id integer not null references users(id) on delete cascade,
+    session_id varchar(255) primary key,
+    user_id integer not null references users(user_id) on delete cascade,
     last_access timestamp not null default now()
 );
 
 create table if not exists recipe_categories (
-    id serial primary key,
-    name varchar(255) unique not null
+    recipe_category_id serial primary key,
+    recipe_category_name varchar(255) unique not null
 );
 
 create table if not exists recipes (
-    id serial primary key,
-    name varchar(255) unique not null,
+    recipe_id serial primary key,
+    recipe_name varchar(255) unique not null,
     directions text not null,
     source_url varchar(255),
     image_filename varchar(255) not null,
@@ -36,9 +36,9 @@ create table if not exists recipes (
 );
 
 create table if not exists recipes_to_recipe_categories (
-    id serial primary key,
-    recipe_id integer not null references recipes(id) on delete cascade,
-    recipe_category_id integer not null references recipe_categories(id) on delete cascade
+    recipe_to_recipe_category_id serial primary key,
+    recipe_id integer not null references recipes(recipe_id) on delete cascade,
+    recipe_category_id integer not null references recipe_categories(recipe_category_id) on delete cascade
 );
 
 create type unit_category as enum (
@@ -48,60 +48,66 @@ create type unit_category as enum (
 );
 
 create table if not exists units (
-    id serial primary key,
-    name varchar(255) unique not null,
-    category unit_category
+    unit_id serial primary key,
+    unit_name varchar(255) unique not null,
+    conversion_factor real not null,
+    unit_category unit_category
 );
 
 create table if not exists ingredient_categories (
-    id serial primary key,
-    name varchar(255) unique not null
+    ingredient_category_id serial primary key,
+    ingredient_category_name varchar(255) unique not null
+);
+
+create table if not exists ingredients_to_categories (
+    ingredient_to_category_id serial primary key,
+    ingredient_id integer not null references ingredients(ingredient_id) on delete cascade,
+    category_id integer not null references ingredient_categories(ingredient_category_id) on delete cascade
 );
 
 create table if not exists ingredients (
-    id serial primary key,
-    name varchar(255) unique not null,
-    ingredient_category_id integer references ingredient_categories(id) on delete set null,
-    unit_id integer references units(id) on delete set null
+    ingredient_id serial primary key,
+    ingredient_name varchar(255) unique not null,
+    unit_id integer references units(unit_id) on delete set null
 );
 
 create table if not exists recipes_to_ingredients (
-    recipe_id integer not null references recipes(id) on delete cascade,
-    ingredient_id integer not null references ingredients(id) on delete restrict,
-    quantity real not null,
+    recipe_id integer not null references recipes(recipe_id) on delete cascade,
+    ingredient_id integer not null references ingredients(ingredient_id) on delete restrict,
+    recipe_ingredient_quantity real not null,
     primary key (recipe_id, ingredient_id)
 );
 
 create table if not exists lists (
-    id serial primary key,
-    name varchar(255),
-    user_id integer not null references users(id) on delete cascade,
+    list_id serial primary key,
+    list_name varchar(255),
+    user_id integer not null references users(user_id) on delete cascade,
 
     created_at timestamp not null default now(),
     updated_at timestamp not null default now()
 );
 
 create table if not exists lists_to_recipes (
-    list_id integer not null references lists(id) on delete cascade,
-    recipe_id integer not null references recipes(id) on delete cascade,
-    quantity real not null,
+    list_id integer not null references lists(list_id) on delete cascade,
+    recipe_id integer not null references recipes(recipe_id) on delete cascade,
+    list_recipe_quantity real not null,
     primary key (list_id, recipe_id)
 );
 
 create table if not exists custom_list_items (
-    id serial primary key,
-    name varchar(255),
-    quantity real,
+    custom_list_item_id serial primary key,
+    custom_list_item_name varchar(255),
+    custom_list_item_quantity real,
     custom_unit varchar(255),
-    unit_id integer references units(id) on delete set null
+    unit_id integer references units(unit_id) on delete set null
 );
 
-create table if not exists free_list_items (
-    id serial primary key,
-    list_id integer not null references lists(id) on delete cascade,
-    ingredient_id integer references ingredients(id) on delete cascade,
-    custom_list_item_id integer references custom_list_items(id) on delete cascade,
-    check 
+create table if not exists list_items (
+    list_item_id serial primary key,
+    list_id integer not null references lists(list_id) on delete cascade,
+    ingredient_id integer references ingredients(ingredient_id) on delete cascade,
+    custom_list_item_id integer references custom_list_items(custom_list_item_id) on delete cascade,
+    check
         ((ingredient_id is not null and custom_list_item_id is null)
         or (ingredient_id is null and custom_list_item_id is not null))
 );
@@ -144,32 +150,48 @@ $body$
 language plpgsql;
 
 create or replace function create_recipe_category(name text) returns integer as $$
+declare
+    category_id integer;
 begin
-    insert into recipe_categories (name) values (name) returning id;
+    insert into recipe_categories (recipe_category_name) values (name) returning recipe_category_id into category_id;
+    return category_id;
 end
 $$ language plpgsql;
 
 create or replace function create_ingredient_category(name text) returns integer as $$
+declare
+    category_id integer;
 begin
-    insert into ingredient_categories (name) values (name) returning id;
+    insert into ingredient_categories (ingredient_category_name) values (name) returning ingredient_category_id into category_id;
+    return category_id;
 end
 $$ language plpgsql;
 
-create or replace function create_unit(name text, category text) returns integer as $$
+create or replace function create_unit(name text, category text, conversion_factor real) returns integer as $$
+declare
+    new_unit_id integer;
 begin
-    insert into units (name, category) values (name, category) returning id;
+    insert into units (unit_name, unit_category, conversion_factor) values (name, category::unit_category, conversion_factor) returning unit_id into new_unit_id;
+    return new_unit_id;
 end
 $$ language plpgsql;
 
 create or replace function create_ingredient(name text, category_id integer, unit_id integer) returns integer as $$
+declare
+    new_ingredient_id integer;
 begin
-    insert into ingredients (name, ingredient_category_id, unit_id) values (name, category_id, unit_id) returning id;
+    insert into ingredients (ingredient_name, unit_id) values (name, unit_id) returning ingredient_id into new_ingredient_id;
+    insert into ingredients_to_categories (ingredient_id, category_id) values (new_ingredient_id, category_id);
+    return new_ingredient_id;
 end
 $$ language plpgsql;
 
 create or replace function create_recipe(name text, directions text, source_url text, image_filename text) returns integer as $$
+declare
+    new_recipe_id integer;
 begin
-    insert into recipes (name, directions, source_url, image_filename) values (name, directions, source_url, image_filename) returning id;
+    insert into recipes (recipe_name, directions, source_url, image_filename) values (name, directions, source_url, image_filename) returning recipe_id into new_recipe_id;
+    return new_recipe_id;
 end
 $$ language plpgsql;
 
@@ -237,15 +259,15 @@ begin
     pasta_id := create_ingredient_category('pasta, rice, cereal');
     spices_id := create_ingredient_category('spices, seasoning');
 
-    kilogram_id := create_unit('kilogram', 'mass');
-    liter_id := create_unit('liter', 'volume');
-    gram_id := create_unit('gram', 'mass');
-    pound_id := create_unit('pound', 'mass');
-    ounce_id := create_unit('ounce', 'mass');
-    cup_id := create_unit('cup', 'volume');
-    teaspoon_id := create_unit('teaspoon', 'volume');
-    tablespoon_id := create_unit('tablespoon', 'volume');
-    piece_id := create_unit('piece', 'count');
+    kilogram_id := create_unit('kilogram', 'mass', 0.001);
+    liter_id := create_unit('liter', 'volume', 0.001);
+    gram_id := create_unit('gram', 'mass', 1);
+    pound_id := create_unit('pound', 'mass', 0.002205);
+    ounce_id := create_unit('ounce', 'mass', 0.035274);
+    cup_id := create_unit('cup', 'volume', 0.004226);
+    teaspoon_id := create_unit('teaspoon', 'volume', 0.20288);
+    tablespoon_id := create_unit('tablespoon', 'volume', 0.06762);
+    piece_id := create_unit('piece', 'count', 1);
 
     egg_id := create_ingredient('egg', produce_id, piece_id);
     milk_id := create_ingredient('milk', dairy_id, cup_id);
@@ -291,7 +313,7 @@ begin
         (good_old_fashioned_pancakes_id, breakfast_id),
         (easy_homemade_lasagna_id, meal_id);
 
-    insert into recipes_to_ingredients (recipe_id, ingredient_id, quantity) values
+    insert into recipes_to_ingredients (recipe_id, ingredient_id, recipe_ingredient_quantity) values
         (good_old_fashioned_pancakes_id, egg_id, 1),
         (good_old_fashioned_pancakes_id, milk_id, 1),
         (good_old_fashioned_pancakes_id, ricotta_cheese_id, 1),

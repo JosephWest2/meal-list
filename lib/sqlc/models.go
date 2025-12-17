@@ -97,49 +97,54 @@ func (ns NullUnitCategory) Value() (driver.Value, error) {
 }
 
 type CustomListItem struct {
-	ID         int32
-	Name       pgtype.Text
-	Quantity   pgtype.Float4
-	CustomUnit pgtype.Text
-	UnitID     pgtype.Int4
-}
-
-type FreeListItem struct {
-	ID               int32
-	ListID           int32
-	IngredientID     pgtype.Int4
-	CustomListItemID pgtype.Int4
+	CustomListItemID       int32
+	CustomListItemName     pgtype.Text
+	CustomListItemQuantity pgtype.Float4
+	CustomUnit             pgtype.Text
+	UnitID                 pgtype.Int4
 }
 
 type Ingredient struct {
-	ID                   int32
-	Name                 string
-	IngredientCategoryID pgtype.Int4
-	UnitID               pgtype.Int4
+	IngredientID   int32
+	IngredientName string
+	UnitID         pgtype.Int4
 }
 
 type IngredientCategory struct {
-	ID   int32
-	Name string
+	IngredientCategoryID   int32
+	IngredientCategoryName string
+}
+
+type IngredientsToCategory struct {
+	IngredientToCategoryID int32
+	IngredientID           int32
+	CategoryID             int32
 }
 
 type List struct {
-	ID        int32
-	Name      pgtype.Text
+	ListID    int32
+	ListName  pgtype.Text
 	UserID    int32
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
 }
 
+type ListItem struct {
+	ListItemID       int32
+	ListID           int32
+	IngredientID     pgtype.Int4
+	CustomListItemID pgtype.Int4
+}
+
 type ListsToRecipe struct {
-	ListID   int32
-	RecipeID int32
-	Quantity float32
+	ListID             int32
+	RecipeID           int32
+	ListRecipeQuantity float32
 }
 
 type Recipe struct {
-	ID            int32
-	Name          string
+	RecipeID      int32
+	RecipeName    string
 	Directions    string
 	SourceUrl     pgtype.Text
 	ImageFilename string
@@ -148,30 +153,31 @@ type Recipe struct {
 }
 
 type RecipeCategory struct {
-	ID   int32
-	Name string
+	RecipeCategoryID   int32
+	RecipeCategoryName string
 }
 
 type RecipesToIngredient struct {
-	RecipeID     int32
-	IngredientID int32
-	Quantity     float32
+	RecipeID                 int32
+	IngredientID             int32
+	RecipeIngredientQuantity float32
 }
 
 type RecipesToRecipeCategory struct {
-	ID               int32
-	RecipeID         int32
-	RecipeCategoryID int32
+	RecipeToRecipeCategoryID int32
+	RecipeID                 int32
+	RecipeCategoryID         int32
 }
 
 type Unit struct {
-	ID       int32
-	Name     string
-	Category NullUnitCategory
+	UnitID           int32
+	UnitName         string
+	ConversionFactor float32
+	UnitCategory     NullUnitCategory
 }
 
 type User struct {
-	ID           int32
+	UserID       int32
 	Username     string
 	PasswordHash string
 	Role         Role
@@ -180,7 +186,7 @@ type User struct {
 }
 
 type UserSession struct {
-	ID         string
+	SessionID  string
 	UserID     int32
 	LastAccess pgtype.Timestamp
 }

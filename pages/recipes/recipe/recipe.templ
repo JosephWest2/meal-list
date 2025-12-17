@@ -7,9 +7,12 @@ import (
 
 templ Recipe(recipe *sqlc.Recipe, categories []sqlc.RecipeCategory, ingredients []sqlc.GetRecipeAssociatedIngredientsAndUnitsRow, directionsParsed []string) {
     <h2>{ recipe.Name }</h2>
-    <h3>Category { recipe.RecipeCategory.Name }</h3>
-    <a target="_blank" class="inline-link" href={ templ.SafeURL(recipe.RecipeSourceURL) }>Source</a>
-    <img class="recipe-image" src={ "/static/recipeImages/" + recipe.RecipeImage } alt={ "Image of " + recipe.Name }>
+    <h3>Categories:</h3>
+    for _, category := range categories {
+        <p>{ category.Name }</p>
+    }
+    <a target="_blank" class="inline-link" href={ templ.SafeURL(recipe.SourceUrl.String) }>Source</a>
+    <img class="recipe-image" src={ "/static/recipeImages/" + recipe.ImageFilename } alt={ "Image of " + recipe.Name }>
     <h3>Ingredients</h3>
     <table class="ingredient-table">
         <tr>
@@ -17,11 +20,11 @@ templ Recipe(recipe *sqlc.Recipe, categories []sqlc.RecipeCategory, ingredients 
             <th>Amount</th>
             <th>Unit</th>
         </tr>
-        for _, ingredient := range recipe.Ingredients {
+        for _, ingredient := range ingredients {
             <tr>
-                <td>{ ingredient.Ingredient.Name }</td>
-                <td>{ strconv.FormatFloat(ingredient.Quantity, 'f', 2, 64) }</td>
-                <td>{ ingredient.Unit.Name }</td>
+                <td>{ ingredient.Name }</td>
+                <td>{ strconv.FormatFloat(float64(ingredient.Quantity), 'f', 2, 64) }</td>
+                <td>{ ingredient.Category.UnitCategory}</td>
             </tr>
         }
     </table>

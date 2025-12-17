@@ -9,27 +9,27 @@ import (
 
 func Get(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pages.RenderPage(context, "Login", Login(), nil, w, r)
+		redirectTarget := r.URL.Query().Get("redirect-target")
+		pages.RenderPage(context, "Login", Login(redirectTarget), nil, w, r)
 	}
 }
 func Post(context *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
-		target := r.FormValue("redirecttarget")
-		if target == "" {
-			target = "/"
+		redirectTarget := r.URL.Query().Get("redirect-target")
+		if redirectTarget == "" {
+			redirectTarget = "/"
 		}
 		if auth.Authenticate(context, w, r, username, password) {
-			pages.RedirectWithMessage(w, r, target, pages.PageMessage{Type: pages.MessageSuccess, Value: "Login Success", Timeout: false})
+			pages.RedirectWithMessage(w, r, redirectTarget, pages.PageMessage{Type: pages.MessageSuccess, Value: "Login Success"})
 			return
 		}
 		w.WriteHeader(http.StatusUnauthorized)
 		messages := []pages.PageMessage{{
 			Value:   "Invalid Credentials",
 			Type:    pages.MessageError,
-			Timeout: false,
 		}}
-		pages.RenderPage(context, "Login", Login(), messages, w, r)
+		pages.RenderPage(context, "Login", Login(redirectTarget), messages, w, r)
 	}
 }

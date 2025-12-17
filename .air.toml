@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "tmp/main.exe"
-  cmd = "sqlc generate && templ generate && go build -o ./tmp/main.exe ."
+  cmd = "npx @tailwindcss/cli -i ./static/css/tailwind_input.css -o ./static/css/tailwind_output.css && sqlc generate && templ generate && go build -o ./tmp/main.exe ."
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "lib/sqlc"]
   exclude_file = []

@@ -31,8 +31,8 @@ func Patch(context *app.App) http.HandlerFunc {
 			return
 		}
 		_, err = context.Queries.UpdateRecipeCategory(context.QueryContext, sqlc.UpdateRecipeCategoryParams{
-			ID:   int32(id),
-			Name: name})
+			RecipeCategoryID:   int32(id),
+			RecipeCategoryName: name})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			print("Failed to update recipe category: " + err.Error())

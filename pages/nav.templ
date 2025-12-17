@@ -1,0 +1,19 @@
+package pages
+
+templ nav(isAuthenticated bool, isAdmin bool) {
+	<nav>
+		<a class="navitem" href="/">Home</a>
+		<a class="navitem" href="/recipes">Recipes</a>
+		<a class="navitem" href="/list">List</a>
+		if isAdmin {
+			<a class="navitem" href="/ingredients">Ingredients</a>
+			<a class="navitem" href="/ingredientCategories">Ingredient Categories</a>
+			<a class="navitem" href="/recipeCategories">Recipe Categories</a>
+		}
+		if isAuthenticated {
+			<a class="navitem" href="/logout">Logout</a>
+		} else {
+			<a class="navitem" href="/login">Login</a>
+		}
+	</nav>
+}
