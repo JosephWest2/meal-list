@@ -1,5 +1,6 @@
-tmp
+tmp/
 static/recipeImages/
 .env
 *_templ.go
 meal-list
+node_modules/
