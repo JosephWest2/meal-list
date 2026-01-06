@@ -11,16 +11,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const authCookieName = "meal-list-auth"
+const sessionCookieName = "meal-list-session"
 const sessionTimeout = 24 * time.Hour
 
 func IsAuthenticated(context *app.App, r *http.Request) bool {
-	authCookie, err := r.Cookie(authCookieName)
+	sessionCookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
 		return false
 	}
 
-	session, err := context.Queries.GetUserSessionBySessionID(context.QueryContext, authCookie.Value)
+	session, err := context.Queries.GetUserSessionBySessionID(context.QueryContext, sessionCookie.Value)
 	if err != nil {
 		return false
 	}
@@ -78,29 +78,29 @@ func Authenticate(context *app.App, w http.ResponseWriter, r *http.Request, user
 }
 
 func GetSessionIDFromCookie(r *http.Request) string {
-	authCookie, err := r.Cookie(authCookieName)
+	sessionCookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
 		return ""
 	}
-	return authCookie.Value
+	return sessionCookie.Value
 }
 
 func SetSessionCookie(w http.ResponseWriter, sessionId string) {
-	authCookie := http.Cookie{
-		Name:     authCookieName,
+	sessionCookie := http.Cookie{
+		Name:     sessionCookieName,
 		Value:    sessionId,
 		Path:     "/",
-		Expires:  time.Now().Add(30 * time.Minute),
+		Expires:  time.Now().Add(sessionTimeout),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteStrictMode,
 	}
-	http.SetCookie(w, &authCookie)
+	http.SetCookie(w, &sessionCookie)
 }
 
 func ClearSessionCookie(w http.ResponseWriter) {
-	authCookie := http.Cookie{
-		Name:     authCookieName,
+	sessionCookie := http.Cookie{
+		Name:     sessionCookieName,
 		Value:    "",
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
@@ -108,15 +108,15 @@ func ClearSessionCookie(w http.ResponseWriter) {
 		Secure:   true,
 		SameSite: http.SameSiteStrictMode,
 	}
-	http.SetCookie(w, &authCookie)
+	http.SetCookie(w, &sessionCookie)
 }
 
-func GetAuthCookieValue(r *http.Request) string {
-	authCookie, err := r.Cookie(authCookieName)
+func GetSessionCookieValue(r *http.Request) string {
+	sessionCookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
 		return ""
 	}
-	return authCookie.Value
+	return sessionCookie.Value
 }
 
 func WithAuth(requiredRole sqlc.Role, context *app.App, handler http.HandlerFunc) http.HandlerFunc {
@@ -137,7 +137,7 @@ func WithAuth(requiredRole sqlc.Role, context *app.App, handler http.HandlerFunc
 }
 
 func IsLoggedInUnverified(r *http.Request) bool {
-	return GetAuthCookieValue(r) != ""
+	return GetSessionCookieValue(r) != ""
 }
 
 func GetUserIDFromSession(context *app.App, r *http.Request) (int32, error) {
