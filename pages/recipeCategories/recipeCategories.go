@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		categories, err := context.Queries.GetAllRecipeCategories(context.QueryContext)
 		if err != nil {
@@ -20,7 +20,7 @@ func Get(context *app.App) http.HandlerFunc {
 	}
 }
 
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context, r, sqlc.RoleAdmin), "Post to auth protected route")
 

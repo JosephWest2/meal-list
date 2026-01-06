@@ -27,13 +27,13 @@ func IsValidPassword(password string) []error {
 	return errs
 }
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pages.RenderPage(context, "Register", Register(), nil, w, r)
 	}
 }
 
-func Post(app *app.App) http.HandlerFunc {
+func Post(app *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		messages := make([]pages.PageMessage, 0)
 		r.ParseForm()

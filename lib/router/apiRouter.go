@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func RegisterAPIRoutes(mux *http.ServeMux, app *app.App) {
+func RegisterAPIRoutes(mux *http.ServeMux, app *app.AppContext) {
 	mux.HandleFunc("POST /api/seed", seed.Post(app))
 	mux.HandleFunc("POST /api/addRecipeToList", auth.WithAuth(sqlc.RoleStandard, app, addRecipeToList.Post(app)))
 

@@ -23,7 +23,7 @@ func main() {
 	pool, err := pgxpool.New(ctx, postgresConnectionString)
 	queries := sqlc.New(pool)
 
-	context := app.App{Queries: queries, QueryContext: ctx}
+	context := app.AppContext{Queries: queries, QueryContext: ctx}
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))

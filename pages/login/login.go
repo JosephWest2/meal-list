@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		redirectTarget := r.URL.Query().Get("redirect-target")
 		pages.RenderPage(context, "Login", Login(redirectTarget), nil, w, r)
 	}
 }
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")

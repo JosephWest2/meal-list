@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbRecipes, err := context.Queries.GetRecipesWithOffset(context.QueryContext, sqlc.GetRecipesWithOffsetParams{
 			Offset: 0,
@@ -33,7 +33,7 @@ func Get(context *app.App) http.HandlerFunc {
 	}
 }
 
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		isAdmin := auth.IsAuthorized(context, r, sqlc.RoleAdmin)
 		if !isAdmin {

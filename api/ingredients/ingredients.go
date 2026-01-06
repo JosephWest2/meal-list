@@ -15,7 +15,7 @@ type IngredientParams struct {
 	CategoryID uint   `json:"category"`
 }
 
-func Patch(context *app.App) http.HandlerFunc {
+func Patch(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idString := r.PathValue("id")
 		id, err := strconv.ParseInt(idString, 10, 32)
@@ -44,7 +44,7 @@ func Patch(context *app.App) http.HandlerFunc {
 	}
 }
 
-func Delete(context *app.App) http.HandlerFunc {
+func Delete(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idString := r.PathValue("id")
 		id, err := strconv.ParseUint(idString, 10, 32)

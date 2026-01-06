@@ -10,7 +10,7 @@ import (
 
 )
 
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthenticated(context, r), "Unauthenticated user in WithAuth protected path")
 

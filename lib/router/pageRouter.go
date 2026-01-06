@@ -17,7 +17,7 @@ import (
 	"net/http"
 )
 
-func RegisterPageRoutes(mux *http.ServeMux, context *app.App) {
+func RegisterPageRoutes(mux *http.ServeMux, context *app.AppContext) {
 
 	mux.HandleFunc("GET /", index.Get(context))
 

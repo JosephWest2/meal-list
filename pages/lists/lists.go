@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, err := auth.GetUserIDFromSession(context, r)
 		assert.Assert(err == nil, "UserID is null in WithAuth protected path")

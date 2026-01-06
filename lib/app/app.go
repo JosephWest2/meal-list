@@ -5,7 +5,7 @@ import (
 	"josephwest2/meal-list/lib/sqlc"
 )
 
-type App struct {
+type AppContext struct {
 	Queries      *sqlc.Queries
 	QueryContext context.Context
 }

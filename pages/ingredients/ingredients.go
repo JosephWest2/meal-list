@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ingredients, err := context.Queries.GetAllIngredients(context.QueryContext)
 		if err != nil {
@@ -28,7 +28,7 @@ func Get(context *app.App) http.HandlerFunc {
 	}
 }
 
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		messages := make([]pages.PageMessage, 0)
 		r.ParseForm()

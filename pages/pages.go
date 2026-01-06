@@ -40,7 +40,7 @@ func RedirectWithMessage(w http.ResponseWriter, r *http.Request, path string, me
 	http.Redirect(w, r, path+s, http.StatusSeeOther)
 }
 
-func RenderPage(app *app.App, pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
+func RenderPage(app *app.AppContext, pageTitle string, pageComponent templ.Component, messages []PageMessage, w http.ResponseWriter, r *http.Request) {
 
 	messageQuery := r.URL.Query()["info"]
 	if messageQuery != nil {

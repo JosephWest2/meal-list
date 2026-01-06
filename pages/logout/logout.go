@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pages.RenderPage(context, "Logout", Logout(), nil, w, r)
 	}
 }
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		auth.Logout(context, w, r)
 		http.Redirect(w, r, "/?message=Logged+Out", http.StatusSeeOther)

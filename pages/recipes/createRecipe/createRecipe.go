@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func Get(context *app.App) http.HandlerFunc {
+func Get(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context, r, sqlc.RoleAdmin), "Admin role required")
 		categories, err := context.Queries.GetAllRecipeCategories(context.QueryContext)
@@ -45,7 +45,7 @@ type IngredientInput struct {
 
 const imageDirectory = "./static/recipeImages/"
 
-func Post(context *app.App) http.HandlerFunc {
+func Post(context *app.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		assert.Assert(auth.IsAuthorized(context, r, sqlc.RoleAdmin), "Admin role required")
 		r.ParseMultipartForm(5 << 20)
